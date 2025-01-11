@@ -227,7 +227,9 @@
         alert("Transaction completed");
 
         cart = {};
-        document.cookie = "cart=" + JSON.stringify(cart) + ";domain=;path=/";
+        // document.cookie = "cart=" + JSON.stringify(cart) + ";domain=;path=/";
+        // document.cookie = "cart=; path=/;";
+        document.cookie = "cart=; Max-Age=0; path=/; domain=" + location.host;
 
         window.location.href = "{% url 'store' %}";
       });

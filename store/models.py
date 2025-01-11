@@ -20,6 +20,10 @@ class Product(models.Model):
     quantity = models.IntegerField(default=10)
     digital = models.BooleanField(default=False,null=True, blank=True)
     image = models.ImageField(null=True, blank=True)
+	
+    description = models.TextField(null=True, blank=True)
+    owner = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True)
+
     @property
     def imageURL(self):
         try:
@@ -73,6 +77,8 @@ class OrderItem(models.Model):
 	def get_total(self):
 		total = self.product.price * self.quantity
 		return total
+	def __str__(self):
+		return f'name: {self.product.name}, quantity: {self.quantity}'
 	
 class ShippingAddress(models.Model):
 	customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True)

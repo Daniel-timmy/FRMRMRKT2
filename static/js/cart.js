@@ -4,11 +4,13 @@ for (i = 0; i < updateBtns.length; i++) {
 	updateBtns[i].addEventListener('click', function(){
 		var productId = this.dataset.product
 		var action = this.dataset.action
+		var qty = this.dataset.qty
 		console.log('productId:', productId, 'Action:', action)
 		console.log('USER:', user)
+		console.log('qty:', qty)
 
 		if (user == 'AnonymousUser'){
-			addCookieItem(productId, action)
+			addCookieItem(productId, qty, action)
 		}else{
 			updateUserOrder(productId, action)
 		}
@@ -26,7 +28,7 @@ function updateUserOrder(productId, action){
 				'Content-Type':'application/json',
 				'X-CSRFToken':csrftoken,
 			}, 
-			body:JSON.stringify({'productId':productId, 'action':action})
+			body:JSON.stringify({'productId':productId, 'action':action})	
 		})
 		.then((response) => {
 		   return response.json();
@@ -36,15 +38,23 @@ function updateUserOrder(productId, action){
 		});
 }
 
-function addCookieItem(productId, action){
+function addCookieItem(productId, productqty, action){
 	console.log('User is not authenticated')
+	console.log(productqty)
 
 	if (action == 'add'){
 		if (cart[productId] == undefined){
-		cart[productId] = {'quantity':1}
+			if (productqty <= 0){
+				return
+			}
+			cart[productId] = {'quantity':1}
 
 		}else{
+			if (productqty < (cart[productId]['quantity'] + 1)) {
+			return
+			}
 			cart[productId]['quantity'] += 1
+			console.log('Item quantity increased')
 		}
 	}
 

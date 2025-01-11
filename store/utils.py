@@ -29,7 +29,8 @@ def cookieCart(request):
 				'id':product.id,
 				'product':{'id':product.id,'name':product.name, 'price':product.price, 
 				'imageURL':product.imageURL}, 'quantity':cart[i]['quantity'],
-				'digital':product.digital,'get_total':total,
+				'digital':product.digital,'get_total':total, 
+				'available_quantity': product.quantity,
 				}
 			items.append(item)
 

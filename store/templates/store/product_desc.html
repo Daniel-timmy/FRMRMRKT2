@@ -1,0 +1,24 @@
+{% extends 'store/main.html'%} {% load static %} {% block content %}
+<div class="card mb-3">
+  <img
+    src="https://mdbcdn.b-cdn.net/img/Photos/Lightbox/Original/img%20(112).webp"
+    class="card-img-top"
+    alt="..."
+  />
+  <div class="card-body">
+    <h5 class="card-title">{{product.name}}</h5>
+    <p class="card-text">Description: {{ product.description }}</p>
+    <p class="card-text">Price: {{ product.price }}</p>
+    <p class="card-text">In stock: {{ product.quantity }}</p>
+  </div>
+  <button
+    data-product="{{product.id}}"
+    data-qty="{{product.quantity}}"
+    data-action="add"
+    class="btn btn-outline-secondary add-btn update-cart"
+  >
+    Add to Cart
+  </button>
+</div>
+
+{% endblock content %}

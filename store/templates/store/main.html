@@ -97,9 +97,29 @@
               >Store <span class="sr-only">(current)</span></a
             >
           </li>
+          {% if user.customer.acct_type == 'regular' %}
+          <li class="nav-item active">
+            <a class="nav-link" href="{% url 'profile' %}"
+              >Profile <span class="sr-only">(current)</span></a
+            >
+          </li>
+          {% endif %} {% if user.customer.acct_type == 'business' %}
+          <li class="nav-item active">
+            <a class="nav-link" href="{% url 'dashboard' %}"
+              >Dashboard <span class="sr-only">(current)</span></a
+            >
+          </li>
+          {% endif %}
         </ul>
         <div class="form-inline my-2 my-lg-0">
-          {% if not user.is_authenticated %}
+          {% if user.customer.acct_type == 'business' %}
+          <a
+            href="{% url 'upload_product' %}"
+            class="btn btn-dark"
+            style="border-radius: 5px"
+            >Upload</a
+          >
+          {% endif %} {% if not user.is_authenticated %}
           <a
             href="{% url 'login' %}"
             class="btn btn-dark"

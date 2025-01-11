@@ -1,0 +1,85 @@
+{% extends 'store/main.html'%} {% load static %} {% block content %}
+<div class="container" style="height: 300px">
+  <form
+    class="col-6 mx-auto card p-3 shadow-lg"
+    method="post"
+    enctype="multipart/form-data"
+  >
+    {% csrf_token %} {% if messages %}
+    <div class="alert alert-primary" role="alert">
+      {% for message in messages %} {{ message }} {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="row">
+      <div class="col">
+        <div class="form-group">
+          <label for="productName">Product name</label>
+          <input
+            type="text"
+            name="product_name"
+            class="form-control"
+            id="product_name"
+            placeholder="Product name"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="desc">Description</label>
+          <input
+            type="text"
+            name="desc"
+            class="form-control"
+            id="desc"
+            placeholder="Description"
+            required
+          />
+        </div>
+      </div>
+      <div class="col">
+        <div class="form-group">
+          <label for="price">Price</label>
+          <input
+            type="number"
+            name="price"
+            class="form-control"
+            id="price"
+            placeholder="Price"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="quantity">Quantity</label>
+          <input
+            type="number"
+            name="quantity"
+            class="form-control"
+            id="quantity"
+            placeholder="Quantity"
+            required
+          />
+        </div>
+      </div>
+      <div class="col">
+        <div class="form-group">
+          <label for="image">image</label>
+          <input
+            type="text"
+            name="image"
+            class="form-control"
+            id="image"
+            placeholder="image"
+          />
+        </div>
+        <img
+          src="{% static 'images/placeholder.png' %}"
+          class="img-thumbnail"
+          alt="..."
+        />
+      </div>
+    </div>
+    <button type="submit" class="btn btn-dark">Upload</button>
+  </form>
+</div>
+
+{% endblock content %}

@@ -81,6 +81,18 @@ def log_out(request):
 	return redirect('/store/')
 
 
+@login_required(login_url='/login/')
+def profile(request):
+
+	return render(request, 'business/profile.html')
+
+@login_required(login_url='/login/')
+def dashboard(request):
+	if request.user.customer.acct_type != 'business':
+		return redirect('/profile/')
+	return render(request, 'business/dashboard.html')
+
+
 def store(request):
 
 	data = cartData(request)
@@ -108,6 +120,7 @@ def checkout(request):
 	cartItems = data['cartItems']
 	order = data['order']
 	items = data['items']
+	
 
 	context = {'items':items, 'order':order, 'cartItems':cartItems}
 	return render(request, 'store/checkout.html', context)
@@ -126,7 +139,8 @@ def updateItem(request):
 	orderItem, created = OrderItem.objects.get_or_create(order=order, product=product)
 
 	if action == 'add':
-		orderItem.quantity = (orderItem.quantity + 1)
+		if product.quantity > orderItem.quantity:
+			orderItem.quantity = (orderItem.quantity + 1)
 	elif action == 'remove':
 		orderItem.quantity = (orderItem.quantity - 1)
 
@@ -143,7 +157,6 @@ def processOrder(request):
 	if request.user.is_authenticated:
 		customer = request.user.customer
 		order, created = Order.objects.get_or_create(customer=customer, complete=False)
-		
 	else:
 		customer, order = guestOrder(request, data)
 
@@ -163,4 +176,42 @@ def processOrder(request):
 				state=data['shipping']['state'],
 				zipcode=data['shipping']['zipcode'],)
 			
+	items = cartData(request)['items']
+
+	for item in items:
+		product = Product.objects.get(id=item.product.id)
+		product.quantity -= item.quantity
+		product.save()
+
+	# send email to the product owner
 	return JsonResponse('Payment submitted..', safe=False)
+
+@login_required(login_url='/login/')
+def upload_product(request):
+	if request.method == "POST":
+		if request.user.customer.acct_type != 'business':
+			messages.error(request, 'You are not authorized to upload product')
+			return redirect('/store/')
+		name = request.POST.get('product_name')
+		price = request.POST.get('price') 
+		quantity = request.POST.get('quantity')
+		desc = request.POST.get('desc')
+		# image = request.POST.get('product_image')
+
+		product = Product(name=name, 
+					price=price,
+					quantity=quantity, 
+					description=desc,
+					owner=request.user.customer)
+		product.save()
+		messages.info(request, 'Product uploaded successfully')
+	return render(request, 'business/upload.html')
+
+@login_required(login_url='/login/')
+def product_desc(request, id):
+	product = Product.objects.get(id=id)
+	data = cartData(request)
+	cartItems = data['cartItems']
+
+	context = {'product':product, 'cartItems':cartItems}
+	return render(request, 'store/product_desc.html', context)
