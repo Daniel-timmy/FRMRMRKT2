@@ -2,14 +2,14 @@ from django.http import JsonResponse
 from .models import * 
 import json
 import datetime
-from .utils import cookieCart, cartData, guestOrder
+from .utils import cookieCart, cartData, guestOrder, send_email_to_product_owner
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from .models import *
-
+from django.core.cache import cache
 
 def home(request):
     return render(request, 'home.html')
@@ -64,7 +64,7 @@ def register(request):
         user.set_password(password)
         user.save()
         customer = Customer(user=user,
-							name=first_name + last_name,
+							name=first_name +" " + last_name,
 							email=email,
 							acct_type=acct_type)
         customer.save()
@@ -90,7 +90,35 @@ def profile(request):
 def dashboard(request):
 	if request.user.customer.acct_type != 'business':
 		return redirect('/profile/')
-	return render(request, 'business/dashboard.html')
+	order_items = OrderItem.objects.filter(business=request.user.customer).all()
+	new_order =       	order_items.filter(status='New').count()
+	shipped_orders =  	order_items.filter(status='Shipped').order_by('-date_added')[:10]
+	delivered_orders =	order_items.filter(status='Delivered').order_by('-date_added')[:10]
+	pending_orders =  	order_items.filter(status='Pending').order_by('-date_added')[:10]
+
+	cache_key = f"products_{request.user.customer.id}"
+
+	# Try to get the cached result
+	aproducts = cache.get(cache_key)
+	if not aproducts:
+		aproducts = Product.objects.filter(owner=request.user.customer).all()
+		cache.set(cache_key, aproducts, timeout=60*15)
+	total_products = len(aproducts)
+
+	products = aproducts.filter(owner=request.user.customer).order_by('-date_added')[:10]
+	
+	total_orders =          len(order_items)
+	no_shipped_orders =  	order_items.filter(status='Shipped').count()
+	no_delivered_orders =	order_items.filter(status='Delivered').count()
+	no_pending_orders =  	order_items.filter(status='Pending').count()
+
+	
+	context = {'products': list(products), 'order_items': list(order_items), 
+			'total_products': total_products, 'new_orders':new_order, 'shipped_orders': shipped_orders,
+			'delivered_orders': delivered_orders, 'pending_orders': pending_orders, "total_orders": total_orders, "no_pending_orders": no_pending_orders,
+			    "no_shipped_orders":no_shipped_orders, 'no_delivered_orders': no_delivered_orders}
+	# print(context)
+	return render(request, 'business/dashboard.html', context)
 
 
 def store(request):
@@ -136,7 +164,10 @@ def updateItem(request):
 	product = Product.objects.get(id=productId)
 	order, created = Order.objects.get_or_create(customer=customer, complete=False)
 
-	orderItem, created = OrderItem.objects.get_or_create(order=order, product=product)
+	orderItem, created = OrderItem.objects.get_or_create(order=order,
+													   product=product, price=product.price, 
+													   business=product.owner)
+
 
 	if action == 'add':
 		if product.quantity > orderItem.quantity:
@@ -160,28 +191,33 @@ def processOrder(request):
 	else:
 		customer, order = guestOrder(request, data)
 
-		total = float(data['form']['total'])
-		order.transaction_id = transaction_id
+	total = float(data['form']['total'])
+	order.transaction_id = transaction_id
 
-		if total == order.get_cart_total:
-			order.complete = True
-		order.save()
+	if total == order.get_cart_total:
+		order.complete = True
+	order.save()
 		
-		if order.shipping == True:
-			ShippingAddress.objects.create(
-				customer=customer,
-				order=order,
-				address=data['shipping']['address'],
-				city=data['shipping']['city'],
-				state=data['shipping']['state'],
-				zipcode=data['shipping']['zipcode'],)
+		# if order.shipping == True:
+	shipping, created = ShippingAddress.objects.get_or_create(
+		customer=customer,
+		order=order,
+		address=data['shipping']['address'],
+		city=data['shipping']['city'],
+		state=data['shipping']['state'],
+		zipcode=data['shipping']['zipcode'],)
 			
 	items = cartData(request)['items']
+
+	product_detail_to_send = {}
 
 	for item in items:
 		product = Product.objects.get(id=item.product.id)
 		product.quantity -= item.quantity
 		product.save()
+		product_detail_to_send.setdefault(product.owner.email, []).append(item)
+	
+	send_email_to_product_owner(product_detail_to_send, shipping)
 
 	# send email to the product owner
 	return JsonResponse('Payment submitted..', safe=False)
@@ -212,6 +248,67 @@ def product_desc(request, id):
 	product = Product.objects.get(id=id)
 	data = cartData(request)
 	cartItems = data['cartItems']
-
 	context = {'product':product, 'cartItems':cartItems}
+	print(context)
 	return render(request, 'store/product_desc.html', context)
+
+@login_required(login_url='/login/')
+def update_product(request):
+	if request.method == 'POST':
+		data = json.loads(request.body)
+		if data['action'] == 'update':
+			product = Product.objects.get(id=data['productId'])
+			updates = data['productData']
+			for key, value in updates.items():
+				if key == 'price':
+					setattr(product, key, float(value))
+				elif key == 'quantity':
+					setattr(product, key, int(value))
+				else:
+					setattr(product, key, value)
+			product.save()
+		elif data['action'] == 'delete':
+			product = Product.objects.get(id=data['productId'])
+			print(product)
+			product.delete()
+		return JsonResponse('Product updated', safe=False)
+	return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+@login_required(login_url='/login/')
+def update_order_item(request):
+	if request.method == 'POST':
+		data = json.loads(request.body)
+		if data['action'] == 'update':
+			order_item = OrderItem.objects.get(id=data['orderItemId'])
+			updates = data['OrderItemData']
+			for key, value in updates.items():
+				setattr(order_item, key, value)
+			order_item.save()
+		elif data['action'] == 'delete':
+			order_item = OrderItem.objects.get(id=data['orderItemId'])
+			order_item.delete()
+		return JsonResponse('Order updated', safe=False)
+	return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+@login_required(login_url='/login/')
+def show_all(request, status):
+	orders = Order.objects.filter(customer=request.user.customer).order_by('-date_ordered').all()
+	purchases = []
+	for order in orders:
+		purchases = purchases + list(order.order_item_list)
+	
+	order_items = OrderItem.objects.filter(business=request.user.customer).all()
+	cache_key = f"products_{request.user.customer.id}"
+    
+	aproducts = cache.get(cache_key)
+	if not aproducts:
+		aproducts = Product.objects.filter(owner=request.user.customer).all()
+		cache.set(cache_key, aproducts, timeout=60*15)  # Cache for 15 minutes
+
+	shipped =  	order_items.filter(status='Shipped').order_by('-date_added')
+	delivered =	order_items.filter(status='Delivered').order_by('-date_added')
+	pending =  	order_items.filter(status='Pending').order_by('-date_added')
+	orders = {'pending': pending, 'shipped': shipped, 'delivered': delivered, 'products': aproducts, 'purchases': purchases}
+	context = {'items': orders[status], 'status': status}
+	print(context)
+	return render(request, 'business/show_all.html', context)

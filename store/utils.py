@@ -1,5 +1,7 @@
 import json
 from .models import *
+from django.core.mail import send_mail
+from django.conf import settings
 
 def cookieCart(request):
 
@@ -41,6 +43,59 @@ def cookieCart(request):
 			
 	return {'cartItems':cartItems ,'order':order, 'items':items}
 
+def send_email_to_product_owner(product_detail_to_send, shipping):
+	# send email to the product owner
+
+
+	shipping_info = f"""
+		+---------------------+--------------------------------+
+		| Field               | Value                          |
+		+---------------------+--------------------------------+
+		| Customer            | {shipping.customer.email}      |
+		| Order               | {shipping.order.transaction_id}      |
+		| Address             | {shipping.address}  		   |
+		| City                | {shipping.city}				   |
+		| State               | {shipping.state}    		   |
+		| Zipcode             | {shipping.zipcode}			   |
+		+---------------------+--------------------------------+
+		"""
+	for key in product_detail_to_send.keys():
+		product = []
+		for item in product_detail_to_send[key]:
+			formatted_string = f"""
+				Product order info
+				+---------------------+--------------------------------+
+				| Field               | Value                          |
+				+---------------------+--------------------------------+
+				| Product ID          | {item.product.id}	           |
+				| Product Name        | {item.product.name}    		   |
+				| Product Price       | {item.product.price}   		   |
+				| Quantity            | {item.quantity}                |
+				| Total               | {item.get_total}               |
+				| Available Quantity  | {item.product.quantity}      |
+				+---------------------+--------------------------------+
+
+				"""
+			product.append(formatted_string)
+		product.append(shipping_info)
+		email_address = key
+		message = ''.join(product)
+		subject = f'Product Order: {shipping.order.transaction_id}'
+		context = {}
+		print(f"""
+				'Product owner':{email_address}
+				{subject}
+				{message}
+		""")
+		# try:
+		# 	send_mail(subject, message, 
+		# 	 settings.EMAIL_HOST_USER, [email_address])
+		# except Exception as e:
+		# 	context['result'] = 'Email sent successfully'
+		# else:
+		# 	context['result'] = 'All fields are required'
+		
+
 def cartData(request):
 	if request.user.is_authenticated:
 		customer = request.user.customer
@@ -75,9 +130,16 @@ def guestOrder(request, data):
 
 	for item in items:
 		product = Product.objects.get(id=item['id'])
+		# orderItem = OrderItem.objects.create(
+		# 	product=product,
+		# 	order=order,
+		# 	quantity=item['quantity'],
+		# )
 		orderItem = OrderItem.objects.create(
 			product=product,
 			order=order,
 			quantity=item['quantity'],
+			business=product.owner,
+			price=product.price,
 		)
 	return customer, order
