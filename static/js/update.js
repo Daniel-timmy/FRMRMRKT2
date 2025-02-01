@@ -6,6 +6,30 @@ var showBtns = document.getElementsByClassName('show')
 var overlayStatus = document.getElementById('overlay-shipping-status');
 var overlayShippingBtn = document.getElementById('overlay-shipping-button');
 
+var editBtn = document.getElementById('edit-customer');
+var overlayCustomer = document.getElementById('overlay-customer');
+var overlayCustomerBtn = document.getElementById('overlay-customer-action');
+
+editBtn.addEventListener('click', function() {
+	console.log(document.getElementById('customer-name').value)
+	overlayCustomerBtn.dataset.Id = this.dataset.id;
+	overlayCustomer.style.display = 'block';
+
+})
+
+overlayCustomerBtn.addEventListener('click', function(){
+	var customerId = this.dataset.Id;
+	var customerData = {
+		name: document.getElementById('customer-name').value,
+		email: document.getElementById('customer-email').value,
+		business_description: document.getElementById('customer-business-description').value,
+		business_location: document.getElementById('customer-business-location').value
+	}
+	console.log('Performing action for customer ID:', customerData);
+	console.log('Performing action for customer ID:', customerId);
+
+	updateCustomer(customerId, 'update', customerData);
+})
 
 
 overlayActionButton.addEventListener('click', function() {
@@ -40,18 +64,29 @@ overlayShippingBtn.addEventListener('click', function() {
 function closeOverlay() {
     overlay.style.display = 'none';
 	overlayStatus.style.display = 'none';
+	overlayCustomer.style.display = 'none';
 }
 
 for (var j = 0; j < showBtns.length; j++){
 	showBtns[j].addEventListener('click', function(){
-		document.getElementById('itemId').innerHTML += this.dataset.id
-		document.getElementById('date_added').innerHTML += this.dataset.dateadded
-		document.getElementById('transaction_id').innerHTML += this.dataset.transactionid
-		document.getElementById('quantity').innerHTML += this.dataset.quantity
-		document.getElementById('product_name').innerHTML += this.dataset.name
-		document.getElementById('price').innerHTML += this.dataset.price
+		document.getElementById('itemId').innerHTML = this.dataset.id
+		document.getElementById('date_added').innerHTML = this.dataset.dateadded
+		document.getElementById('transaction_id').innerHTML = this.dataset.transactionid
+		document.getElementById('quantity').innerHTML = this.dataset.quantity
+		document.getElementById('product_name').innerHTML = this.dataset.name
+		document.getElementById('price').innerHTML = this.dataset.price
 		document.getElementById('status').innerHTML += this.dataset.status
-		console.log(this.dataset.id)
+		let s = JSON.stringify(this.dataset.shipping)
+		const shipping = eval('(' + JSON.parse(s) + ')')
+		console.log(shipping)
+		console.log(typeof shipping)
+		document.getElementById('sc_name').innerHTML = shipping.customer
+		document.getElementById('sc_email').innerHTML = shipping.email
+		document.getElementById('city').innerHTML = shipping.city
+		document.getElementById('address').innerHTML = shipping.address
+		document.getElementById('state').innerHTML = shipping.state
+		document.getElementById('zip').innerHTML = shipping.zipcode
+		// console.log(this.dataset.id)
 		overlayStatus.style.display = 'block';
 		overlayShippingBtn.dataset.item = this.dataset.id;
 	})
@@ -80,7 +115,26 @@ for (var i = 0; i < updateProductsBtns.length; i++) {
 
     });
 }
+function updateCustomer(Id, action, datalist){
+	console.log('User is authenticated, sending data...')
 
+		var url = '/update_customer/'
+
+		fetch(url, {
+			method:'POST',
+			headers:{
+				'Content-Type':'application/json',
+				'X-CSRFToken':csrftoken,
+			}, 
+			body:JSON.stringify({'customerId':Id, 'action':action, 'customerData': datalist})	
+		})
+		.then((response) => {
+		   return response.json();
+		})
+		.then((data) => {
+		    location.reload()
+		});
+}
 
 
 function deleteProduct(productId, action){

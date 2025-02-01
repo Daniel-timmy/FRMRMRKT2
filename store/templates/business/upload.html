@@ -1,7 +1,7 @@
 {% extends 'store/main.html'%} {% load static %} {% block content %}
-<div class="container" style="height: 300px">
+<div style="width: 100%; height: 100%">
   <form
-    class="col-6 mx-auto card p-3 shadow-lg"
+    class="mx-auto p-3 shadow-lg"
     method="post"
     enctype="multipart/form-data"
   >
@@ -36,6 +36,7 @@
           />
         </div>
       </div>
+
       <div class="col">
         <div class="form-group">
           <label for="price">Price</label>
@@ -60,9 +61,10 @@
           />
         </div>
       </div>
+
       <div class="col">
         <div class="form-group">
-          <label for="image">image</label>
+          <label for="image">Image</label>
           <input
             type="text"
             name="image"
@@ -70,6 +72,26 @@
             id="image"
             placeholder="image"
           />
+        </div>
+        <div class="form-group">
+          <label for="productCategory">Category</label>
+          <select
+            name="product_category"
+            class="form-control"
+            id="product_category"
+            required
+          >
+            <option value="" disabled selected>Select Category</option>
+            <option value="Fruits">Fruits</option>
+            <option value="Vegetables">Vegetables</option>
+            <option value="Grains">Grains</option>
+            <option value="Dairy">Dairy</option>
+            <option value="Meat">Meat</option>
+            <option value="Poultry">Poultry</option>
+            <option value="Seafood">Seafood</option>
+            <option value="Nuts">Nuts</option>
+            <option value="Seeds">Seeds</option>
+          </select>
         </div>
         <img
           src="{% static 'images/placeholder.png' %}"

@@ -18,6 +18,8 @@ urlpatterns = [
     path('dashboard/', views.dashboard, name="dashboard"),
     path('product_desc/<int:id>/', views.product_desc, name="product_desc"),
     path('update_product/', views.update_product, name="update_product"),
+    path('update_customer/', views.update_customer, name="update_customer"),
     path('show_all/<str:status>/', views.show_all, name="show_all"),
     path('update_order_item/', views.update_order_item, name="update_order_item"),
+    path('review/<int:id>/', views.review, name="review"),
 ]

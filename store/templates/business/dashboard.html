@@ -1,6 +1,6 @@
 {% extends 'business/mainb.html'%} {% load static %} {% block content %}
 <div class="d-flex" style="display: flex">
-  <div class="card" style="flex: 0.7; margin-right: 20px; width: 70%">
+  <div class="card" style="flex: 1; margin-right: 20px; width: 70%">
     <div
       class="rounded-top text-white d-flex flex-row"
       style="background-color: #000; height: 200px"
@@ -12,16 +12,14 @@
           class="img-fluid img-thumbnail mt-4 mb-2"
           style="width: 150px; z-index: 1"
         />
-        <button
-          type="button"
-          data-mdb-button-init
-          data-mdb-ripple-init
-          class="btn btn-outline-dark text-body"
-          data-mdb-ripple-color="dark"
+        \
+        <a
+          class="btn btn-dark edit"
+          data-id="{{ user.customer.id }}"
+          id="edit-customer"
           style="z-index: 1"
+          >View</a
         >
-          Edit profile
-        </button>
       </div>
       <div class="ms-3" style="margin-top: 130px">
         <h5>{{ user.customer.name }}</h5>
@@ -39,8 +37,10 @@
           <p class="small text-muted mb-0">Products</p>
         </div>
         <div>
-          <p class="mb-1 h5">{{ new_orders }}</p>
-          <p class="small text-muted mb-0">New Orders</p>
+          <a href="{% url 'show_all' 'new_orders' %}">
+            <p class="mb-1 h5">{{ new_orders }}</p>
+            <p class="small text-muted mb-0">New Orders</p>
+          </a>
         </div>
       </div>
     </div>
@@ -49,7 +49,7 @@
         <p class="lead fw-normal mb-1">About Business:</p>
         <div class="p-4 bg-body-tertiary">
           <p class="font-italic mb-1">
-            {{ user.customer.business_description }}
+            {{ user.customer.business_description|default:"No description" }}
           </p>
         </div>
       </div>
@@ -179,6 +179,7 @@
                       data-name="{{ item.product.name }}"
                       data-price="{{ item.price }}"
                       data-status="{{ item.status }}"
+                      data-shipping="{{ item.get_shipping_address }}"
                     >
                       Show
                     </button>
@@ -235,6 +236,7 @@
                       data-name="{{ item.product.name }}"
                       data-price="{{ item.price }}"
                       data-status="{{ item.status }}"
+                      data-shipping="{{ item.get_shipping_address }}"
                     >
                       Show
                     </button>
@@ -356,76 +358,84 @@
     </div>
   </div>
 </div>
-<style>
-  .overlay {
-    position: fixed;
-    display: none;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 2;
-    cursor: pointer;
-  }
-
-  .overlay-content {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: white;
-    padding: 20px;
-    border-radius: 5px;
-    width: 80%;
-    max-width: 600px;
-  }
-  .overlay-shipping-status {
-    position: fixed;
-    display: none;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 2;
-    cursor: pointer;
-  }
-
-  .overlay-content-status {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: white;
-    padding: 20px;
-    border-radius: 5px;
-    width: 80%;
-    max-width: 600px;
-  }
-</style>
+<style></style>
+<div id="overlay-customer" class="overlay-customer">
+  <div class="overlay-customer-content">
+    <h3>Edit Customer</h3>
+    <div class="row row-cols-2">
+      <div class="col">
+        <h6 style="font-size: 10px">Business Name:</h6>
+        <hr />
+        <input
+          type="text"
+          id="customer-name"
+          value="{{ user.customer.name }}"
+        />
+      </div>
+      <div>
+        <h6 style="font-size: 10px">Business email:</h6>
+        <hr />
+        <input
+          type="email"
+          id="customer-email"
+          value="{{ user.customer.email }}"
+        />
+      </div>
+    </div>
+    <div class="row row-cols-2">
+      <div class="col">
+        <h6 style="font-size: 10px">Business Description:</h6>
+        <hr />
+        <textarea id="customer-business-description">
+{{ user.customer.business_description }}</textarea
+        >
+      </div>
+      <div class="col">
+        <h6 style="font-size: 10px">Business location:</h6>
+        <hr />
+        <input
+          type="text"
+          id="customer-business-location"
+          value="{{ user.customer.business_location }}"
+        />
+      </div>
+    </div>
+    <hr />
+    <button id="overlay-customer-action" type="button" class="btn btn-dark">
+      Save changes
+    </button>
+    <button onclick="closeOverlay()" type="button" class="btn btn-outline-dark">
+      Close
+    </button>
+  </div>
+</div>
 <div id="overlay" class="overlay">
   <div class="overlay-content">
     <h3>Edit Product</h3>
-    <div>
-      <label for="product-name">Name:</label>
-      <input type="text" id="product-name" />
+    <div class="row row-cols-2">
+      <div class="col">
+        <h6 style="font-size: 10px">Name:</h6>
+        <hr />
+        <input type="text" id="product-name" />
+      </div>
+
+      <div class="col">
+        <h6 style="font-size: 10px">Price:</h6>
+        <hr />
+        <input type="number" id="product-price" step="0.01" />
+      </div>
     </div>
-    <div>
-      <label for="product-description">Description:</label>
-      <textarea id="product-description"></textarea>
-    </div>
-    <div>
-      <label for="product-price">Price:</label>
-      <input type="number" id="product-price" step="0.01" />
-    </div>
-    <div>
-      <label for="product-quantity">Quantity:</label>
-      <input type="number" id="product-quantity" />
+    <div class="row row-cols-2">
+      <div class="col">
+        <h6 style="font-size: 10px">Quantity:</h6>
+        <hr />
+        <input type="number" id="product-quantity" />
+      </div>
+      <div class="col">
+        <h6 style="font-size: 10px">Description:</h6>
+        <hr />
+        <textarea id="product-description"></textarea>
+      </div>
     </div>
     <button id="overlay-action-button" type="button" class="btn btn-dark">
       Save changes
@@ -437,44 +447,113 @@
 </div>
 
 <div id="overlay-shipping-status" class="overlay-shipping-status">
-  <div class="overlay-content-status row gx-3 gy-2 align-items-center">
-    <div class="col-sm-3">
-      <h6 id="itemId">ID:</h6>
-    </div>
-    <div class="col-sm-3">
-      <h6 id="date_added">Date:</h6>
-    </div>
-    <div class="col-sm-3">
-      <h6 id="transaction_id">Transaction Id:</h6>
-    </div>
-    <div class="col-sm-3">
-      <h6 id="quantity">Quantity:</h6>
-    </div>
-    <div class="col-sm-3">
-      <h6 id="product_name">Product Name:</h6>
-    </div>
-    <div class="col-sm-3">
-      <h6 id="price">Price:</h6>
+  <div class="overlay-content-status align-items-center container">
+    <h3>Order Info</h3>
+    <div class="row row-cols-3">
+      <div class="col">
+        <h6 style="font-size: 10px">Product ID:</h6>
+        <hr />
+
+        <h6 id="itemId"></h6>
+      </div>
+      <div class="col">
+        <h6 style="font-size: 10px">Date:</h6>
+        <hr />
+        <h6 id="date_added"></h6>
+      </div>
+      <div class="col">
+        <h6 style="font-size: 10px">Quantity:</h6>
+        <hr />
+
+        <h6 id="quantity"></h6>
+      </div>
     </div>
 
-    <div class="col-sm-3">
-      <label for="specificSizeSelect">Shipping Status</label>
-      <select class="form-select" id="status">
-        <option value="Pending" selected>Pending</option>
-        <option value="Shipped">Shipped</option>
-        <option value="Delivered">Delivered</option>
-      </select>
+    <div class="row row-cols-3">
+      <div class="col">
+        <h6 style="font-size: 10px">Transaction ID:</h6>
+        <hr />
+
+        <h6 id="transaction_id"></h6>
+      </div>
+
+      <div class="col">
+        <h6 style="font-size: 10px">Product name</h6>
+        <hr />
+        <h6 id="product_name"></h6>
+      </div>
+      <div class="col">
+        <h6 style="font-size: 10px">Price:</h6>
+        <hr />
+        <h6 id="price"></h6>
+      </div>
     </div>
-    <button id="overlay-shipping-button" type="button" class="btn btn-darkt">
-      Save changes
-    </button>
-    <button
-      onclick="closeOverlay()"
-      type="button"
-      class="btn btn-outline-darkt"
-    >
-      Close
-    </button>
+
+    <div class="row row-cols-3">
+      <div class="col">
+        <h6 style="font-size: 10px">Shipping Status</h6>
+        <hr />
+        <select class="form-select" id="status">
+          <option value="Pending" selected>Pending</option>
+          <option value="Shipped">Shipped</option>
+          <option value="Delivered">Delivered</option>
+        </select>
+      </div>
+    </div>
+    <hr />
+    <h6>Shipping Info</h6>
+    <div class="row row-cols-3">
+      <div class="col">
+        <h6 style="font-size: 10px">Customer Name:</h6>
+        <hr />
+        <h6 id="sc_name" style="font-size: 12px"></h6>
+      </div>
+      <div class="col">
+        <h6 style="font-size: 10px">Customer email:</h6>
+        <hr />
+        <h6 id="sc_email" style="font-size: 12px"></h6>
+      </div>
+      <div class="col">
+        <h6 style="font-size: 10px">City:</h6>
+        <hr />
+        <h6 id="city" style="font-size: 12px"></h6>
+      </div>
+    </div>
+    <div class="row row-cols-3">
+      <div class="col">
+        <h6 style="font-size: 10px">State:</h6>
+        <hr />
+        <h6 id="state" style="font-size: 12px"></h6>
+      </div>
+      <div class="col">
+        <h6 style="font-size: 10px">Address:</h6>
+        <hr />
+        <h6 id="address" style="font-size: 12px"></h6>
+      </div>
+      <div class="col">
+        <h6 style="font-size: 10px">Zip:</h6>
+        <hr />
+        <h6 id="zip" style="font-size: 12px"></h6>
+      </div>
+    </div>
+    <hr />
+    <div class="row row-cols-3">
+      <div class="col">
+        <button id="overlay-shipping-button" type="button" class="btn btn-dark">
+          Save changes
+        </button>
+      </div>
+
+      <div class="col">
+        <button
+          onclick="closeOverlay()"
+          type="button"
+          class="btn btn-outline-dark"
+        >
+          Close
+        </button>
+      </div>
+    </div>
   </div>
 </div>
 

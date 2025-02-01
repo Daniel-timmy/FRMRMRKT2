@@ -5,7 +5,10 @@
     <img class="thumbnail" src="{{product.imageURL}}" />
     <div class="box-element product">
       <h6><strong>{{product.name}}</strong></h6>
-      <h6>In stock: {{product.quantity}}</h6>
+      <div style="display: flex; justify-content: space-between">
+        <h6>In stock: {{product.quantity}}</h6>
+        <h6>{{product.get_rating}}</h6>
+      </div>
       <hr />
 
       <button

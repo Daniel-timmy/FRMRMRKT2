@@ -27,7 +27,7 @@ class Product(models.Model):
     image = models.ImageField(null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     owner = models.ForeignKey(Customer, on_delete=models.CASCADE, null=True)
-    # category = models.CharField(null=True)
+    category = models.CharField(max_length=50, default='Generic')
     date_added = models.DateTimeField(default=datetime.now())
 
     @property
@@ -41,10 +41,27 @@ class Product(models.Model):
     def __str__(self):
         return self.name
 	
+    @property
+    def get_reviews(self):
+        return self.reviews_set.all()
+	
+    @property
+    def get_rating(self):
+        reviews = self.reviews_set.all()
+        count = 0
+        rv = []
+        for review in reviews:
+            if review.rating == 0:
+               continue
+            count += 1
+            rv.append(review.rating)
+        return sum(rv)/count if count > 0 else 0
+	
 class Reviews(models.Model):
 	customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True)
 	product = models.ForeignKey(Product, null=False, on_delete=models.CASCADE)
 	review = models.TextField(blank=False)
+	rating = models.IntegerField(default=1)
 	#pics = models.Image
 	created_at = models.DateTimeField(auto_now_add=True)
 		
@@ -95,6 +112,12 @@ class OrderItem(models.Model):
 	def get_total(self):
 		total = self.product.price * self.quantity
 		return total
+	
+	@property
+	def get_shipping_address(self):
+		shipping = ShippingAddress.objects.filter(order=self.order)
+		return shipping[0] if shipping else None
+	
 	def __str__(self):
 		return f'name: {self.product.name}, quantity: {self.quantity}'
 	
@@ -108,4 +131,5 @@ class ShippingAddress(models.Model):
 	date_added = models.DateTimeField(auto_now_add=True)
 
 	def __str__(self):
-		return self.address
+		return str({'address': self.address, 'city': self.city, 'state': self.state,
+		   'zipcode': self.zipcode, 'customer': self.customer.name, 'email': self.customer.email})

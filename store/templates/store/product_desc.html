@@ -10,22 +10,91 @@
     <h5 class="card-title">{{product.name}}</h5>
     <p class="card-text">Description: {{ product.description }}</p>
     <p class="card-text">Price: {{ product.price }}</p>
+    <p class="card-text">Rating: {{ product.get_rating }}</p>
+
     <p class="card-text">In stock: {{ product.quantity }}</p>
   </div>
   <button
     data-product="{{product.id}}"
     data-qty="{{product.quantity}}"
     data-action="add"
-    class="btn btn-outline-secondary add-btn update-cart"
+    class="btn btn-outline-secondary add-btn col-md-6 update-cart"
   >
     Add to Cart
   </button>
 </div>
 <div class="card mb-3">
+  <h5 class="card-title">Reviews</h5>
+  {%for review in reviews%}
   <div class="card-body">
-    <h5 class="card-title">Reviews</h5>
-    <p class="card-text">No reviews yet</p>
+    <p class="card-text">{{review.review|default:'No reviews yet'}}</p>
+    <p class="card-text">
+      <small class="text-muted">{{review.customer.name}} </small>
+      <small class="text-muted"
+        ><b>rated the product {{review.rating}} stars</b></small
+      >
+    </p>
   </div>
+  {%endfor%}
 </div>
+<form class="row g-3">
+  <label for="review" class="form-label">Write a review</label>
+  <div class="col-md-6 input-group mb-3">
+    <input type="text" class="form-control" id="review" />
+    <button
+      class="btn btn-dark"
+      data-product="{{product.id}}"
+      type="button"
+      id="review-send-button"
+    >
+      Send
+    </button>
+  </div>
+  <div class="input-group mb-3">
+    <select class="form-select" id="rating">
+      <option selected></option>
+      <option value="1">1 star</option>
+      <option value="2">2 stars</option>
+      <option value="3">3 stars</option>
+      <option value="4">4 stars</option>
+      <option value="5">5 stars</option>
+    </select>
+    <label class="input-group-text" for="inputGroupSelect02"
+      >Rate product</label
+    >
+  </div>
+</form>
+
+<script>
+  const reviewSendBtn = document.getElementById("review-send-button");
+  reviewSendBtn.addEventListener("click", function () {
+    const review = document.getElementById("review").value;
+    console.log(review);
+    const rating = document.getElementById("rating").value;
+    console.log(rating);
+    var productId = this.dataset.product;
+    console.log(productId);
+    var url = "/review/" + productId + "/";
+    fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": csrftoken,
+      },
+      body: JSON.stringify({
+        review: review,
+        rating: rating,
+        product_id: productId,
+      }),
+    })
+      .then((response) => {
+        return response.json();
+      })
+      .then((data) => {
+        console.log("data:", data);
+        location.reload();
+      });
+  });
+</script>
 
 {% endblock content %}

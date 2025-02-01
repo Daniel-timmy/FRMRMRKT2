@@ -92,13 +92,12 @@ def dashboard(request):
 		return redirect('/profile/')
 	order_items = OrderItem.objects.filter(business=request.user.customer).all()
 	new_order =       	order_items.filter(status='New').count()
-	shipped_orders =  	order_items.filter(status='Shipped').order_by('-date_added')[:10]
-	delivered_orders =	order_items.filter(status='Delivered').order_by('-date_added')[:10]
-	pending_orders =  	order_items.filter(status='Pending').order_by('-date_added')[:10]
+	shipped_orders =  	order_items.filter(status='Shipped').order_by('-date_added')[:5]
+	delivered_orders =	order_items.filter(status='Delivered').order_by('-date_added')[:5]
+	pending_orders =  	order_items.filter(status='Pending').order_by('-date_added')[:5]
 
 	cache_key = f"products_{request.user.customer.id}"
 
-	# Try to get the cached result
 	aproducts = cache.get(cache_key)
 	if not aproducts:
 		aproducts = Product.objects.filter(owner=request.user.customer).all()
@@ -117,7 +116,6 @@ def dashboard(request):
 			'total_products': total_products, 'new_orders':new_order, 'shipped_orders': shipped_orders,
 			'delivered_orders': delivered_orders, 'pending_orders': pending_orders, "total_orders": total_orders, "no_pending_orders": no_pending_orders,
 			    "no_shipped_orders":no_shipped_orders, 'no_delivered_orders': no_delivered_orders}
-	# print(context)
 	return render(request, 'business/dashboard.html', context)
 
 
@@ -232,13 +230,15 @@ def upload_product(request):
 		price = request.POST.get('price') 
 		quantity = request.POST.get('quantity')
 		desc = request.POST.get('desc')
+		category = request.POST.get('product_category')
 		# image = request.POST.get('product_image')
 
 		product = Product(name=name, 
 					price=price,
 					quantity=quantity, 
 					description=desc,
-					owner=request.user.customer)
+					owner=request.user.customer,
+					category=category)
 		product.save()
 		messages.info(request, 'Product uploaded successfully')
 	return render(request, 'business/upload.html')
@@ -248,7 +248,7 @@ def product_desc(request, id):
 	product = Product.objects.get(id=id)
 	data = cartData(request)
 	cartItems = data['cartItems']
-	context = {'product':product, 'cartItems':cartItems}
+	context = {'product':product, 'cartItems':cartItems, 'reviews': product.get_reviews}
 	print(context)
 	return render(request, 'store/product_desc.html', context)
 
@@ -275,6 +275,23 @@ def update_product(request):
 	return JsonResponse({'error': 'Invalid request method'}, status=400)
 
 @login_required(login_url='/login/')
+def update_customer(request):
+	if request.method == 'POST':
+		data = json.loads(request.body)
+		if data['action'] == 'update':
+			customer = Customer.objects.get(id=data['customerId'])
+			updates = data['customerData']
+			for key, value in updates.items():
+				setattr(customer, key, value)
+			customer.save()
+		elif data['action'] == 'delete':
+			customer = Customer.objects.get(id=data['productId'])
+			print(customer)
+			customer.delete()
+		return JsonResponse('Customer details updated', safe=False)
+	return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+@login_required(login_url='/login/')
 def update_order_item(request):
 	if request.method == 'POST':
 		data = json.loads(request.body)
@@ -292,23 +309,50 @@ def update_order_item(request):
 
 @login_required(login_url='/login/')
 def show_all(request, status):
-	orders = Order.objects.filter(customer=request.user.customer).order_by('-date_ordered').all()
-	purchases = []
-	for order in orders:
-		purchases = purchases + list(order.order_item_list)
+	if request.user.customer.acct_type != 'business':
+		return redirect('/profile/')
+	order_item_map = {'pending': 'Pending', 'shipped': 'Shipped', 'delivered': 'Delivered', 'new_orders': 'New'}
 	
-	order_items = OrderItem.objects.filter(business=request.user.customer).all()
-	cache_key = f"products_{request.user.customer.id}"
-    
-	aproducts = cache.get(cache_key)
-	if not aproducts:
-		aproducts = Product.objects.filter(owner=request.user.customer).all()
-		cache.set(cache_key, aproducts, timeout=60*15)  # Cache for 15 minutes
+	if status == 'purchases':
+		orders = Order.objects.filter(customer=request.user.customer).order_by('-date_ordered').all()
+		items = []
+		for order in orders:
+			items = items + list(order.order_item_list)
+	
+	elif status == 'products':
+		cache_key = f"products_{request.user.customer.id}"
+		items = cache.get(cache_key)
+		if not items:
+			items = Product.objects.filter(owner=request.user.customer).all()
+			cache.set(cache_key, items, timeout=60*15)  # Cache for 15 minutes
 
-	shipped =  	order_items.filter(status='Shipped').order_by('-date_added')
-	delivered =	order_items.filter(status='Delivered').order_by('-date_added')
-	pending =  	order_items.filter(status='Pending').order_by('-date_added')
-	orders = {'pending': pending, 'shipped': shipped, 'delivered': delivered, 'products': aproducts, 'purchases': purchases}
-	context = {'items': orders[status], 'status': status}
+	
+	elif status in order_item_map:
+		order_items = OrderItem.objects.filter(business=request.user.customer).all()
+		items =  order_items.filter(status=order_item_map[status]).order_by('-date_added')
+		if status == 'new_orders':
+			for item in items:
+				item.status = 'Pending'
+				item.save()
+
+
+	context = {'items': items, 'status': status}
+	
 	print(context)
 	return render(request, 'business/show_all.html', context)
+
+
+@login_required(login_url='/login/')
+def review(request, id):
+	if request.method == 'POST':
+		data = json.loads(request.body)
+		print(data)
+		product = Product.objects.get(id=id)
+		review = Reviews.objects.create(customer=request.user.customer, 
+								  product=product, review=data['review'], 
+								  rating=int(data['rating']) if data['rating'] != '' else 0)
+		review.save()
+		print(Reviews.objects.all())
+		print(product.get_rating)
+		return JsonResponse('Review submitted', safe=False)
+	return JsonResponse({'error': 'Invalid request method'}, status=400)
