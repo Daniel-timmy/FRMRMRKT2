@@ -118,6 +118,20 @@ def dashboard(request):
 			    "no_shipped_orders":no_shipped_orders, 'no_delivered_orders': no_delivered_orders}
 	return render(request, 'business/dashboard.html', context)
 
+def business_profile(request, id):
+	owner = Customer.objects.get(id=id)
+
+	aproducts = Product.objects.filter(owner=owner).all()
+	total_products = len(aproducts)
+
+	products = aproducts.filter(owner=owner).order_by('-date_added')[:10]
+
+	
+	context = {'products': list(products), 
+			'total_products': total_products, 'customer': owner}
+	print(context)
+	return render(request, 'business/business_profile.html', context)
+
 
 def store(request):
 
@@ -128,7 +142,32 @@ def store(request):
 
 	products = Product.objects.all()
 	context = {'products':products, 'cartItems':cartItems}
+	categories = {'seeds': 'Seeds', 'vegetable': 'Vegetables', 'dairy': 'Dairy', 
+			   'meat': 'Meat', 'tuber': 'Tuber', 'oil': 'Oil','herbs': 'Herbs and Spices',
+			   'chicken': 'Chicken', 'fruits': 'Fruits'}
+	context['categories'] = categories
+	businesses = Customer.objects.filter(acct_type='business')
+	context['businesses'] = businesses
 	return render(request, 'store/store.html', context)
+
+def reload_products(request):
+	filter_data = json.loads(request.body)
+	data = {}
+	
+	if len(filter_data['product_type']) > 0 and len(filter_data['business']) > 0:
+		products = Product.objects.filter(category__in=filter_data['product_type'], owner__in=[int(x) for x in filter_data['business']] )
+		data["products"] = list(products.values("id", "name", "price", "quantity", "owner", "rating"))
+		print(products)
+	elif len(filter_data['product_type']) > 0:
+		products = Product.objects.filter(category__in=filter_data['product_type'])
+		data["products"] = list(products.values("id", "name", "price", "quantity", "owner", "rating"))
+	elif len(filter_data['business']) > 0:
+		products = Product.objects.filter(owner__in=[int(x) for x in filter_data['business']])
+		data["products"] = list(products.values("id", "name", "price", "quantity", "owner", "rating"))
+	else:
+		products = Product.objects.all()
+		data["products"] = list(products.values("id", "name", "price", "quantity", "owner", "rating"))
+	return JsonResponse(data)
 
 def cart(request):
 

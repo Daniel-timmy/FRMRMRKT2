@@ -6,6 +6,8 @@ urlpatterns = [
 	#Leave as empty string for base url
 	path('', views.store, name="store"),
     path('store/', views.store, name="store"),
+    path('store/undefined', views.store, name="store"),
+
 	path('cart/', views.cart, name="cart"),
 	path('checkout/', views.checkout, name="checkout"),
     path('update_item/', views.updateItem, name="update_item"),
@@ -22,4 +24,6 @@ urlpatterns = [
     path('show_all/<str:status>/', views.show_all, name="show_all"),
     path('update_order_item/', views.update_order_item, name="update_order_item"),
     path('review/<int:id>/', views.review, name="review"),
+    path('reload_products/', views.reload_products, name="reload_products"),
+    path('business_profile/<int:id>/', views.business_profile, name="business_profile"),
 ]

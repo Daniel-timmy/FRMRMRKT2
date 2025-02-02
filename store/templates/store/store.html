@@ -1,35 +1,161 @@
 {% extends 'store/main.html' %} {% load static %} {% block content %}
-<div class="row">
-  {% for product in products %}
-  <div class="col-lg-4">
-    <img class="thumbnail" src="{{product.imageURL}}" />
-    <div class="box-element product">
-      <h6><strong>{{product.name}}</strong></h6>
+<!-- <button id="reload-products" class="btn btn-primary">Reload Products</button> -->
+
+<div>
+  <div class="row">
+    <!-- Sidebar -->
+    <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
       <div style="display: flex; justify-content: space-between">
-        <h6>In stock: {{product.quantity}}</h6>
-        <h6>{{product.get_rating}}</h6>
+        <h5>Filter by</h5>
+        <a href="" onclick="applyFilter(event)">Apply</a>
       </div>
       <hr />
+      <h6>Product Type</h6>
+      <div class="position-sticky">
+        <ul class="nav flex-column">
+          {% for key, category in categories.items %}
+          <li class="nav-item">
+            <div class="form-check">
+              <input
+                class="form-check-input category"
+                type="checkbox"
+                value="{{ category }}"
+                id="{{ key }}"
+              />
+              <label class="form-check-label" for="flexCheckDefault">
+                {{ category }}
+              </label>
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      <hr />
+      <h6>Business</h6>
+      <div class="position-sticky">
+        <ul class="nav flex-column">
+          {% for business in businesses %}
+          <li class="nav-item">
+            <div class="form-check">
+              <input
+                class="form-check-input business_f"
+                type="checkbox"
+                value="{{business.id}}"
+                id="{{ business.id }}"
+              />
+              <label class="form-check-label" for="flexCheckDefault">
+                {{ business.name }}
+              </label>
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </nav>
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+      <div class="row product-row" style="flex: 1">
+        {% for product in products %}
+        <div class="col-lg-3 col-md-6">
+          <img class="thumbnail" src="{{product.imageURL}}" />
+          <div class="box-element product">
+            <h6><strong>{{product.name}}</strong></h6>
+            <div style="display: flex; justify-content: space-between">
+              <h6>In stock: {{product.quantity}}</h6>
+              <h6>{{product.get_rating}}</h6>
+            </div>
+            <hr />
 
-      <button
-        data-product="{{product.id}}"
-        data-qty="{{product.quantity}}"
-        data-action="add"
-        class="btn btn-outline-secondary add-btn update-cart"
-      >
-        Add to Cart
-      </button>
-      <a
-        class="btn btn-outline-success"
-        href="{% url 'product_desc' product.id %}"
-        >View</a
-      >
-      <h4 style="display: inline-block; float: right">
-        <strong>${{product.price}}</strong>
-      </h4>
-    </div>
+            <button
+              data-product="{{product.id}}"
+              data-qty="{{product.quantity}}"
+              data-action="add"
+              class="btn btn-outline-secondary add-btn update-cart"
+            >
+              Add to Cart
+            </button>
+            <a
+              class="btn btn-outline-success"
+              href="{% url 'product_desc' product.id %}"
+              >View</a
+            >
+            <h6 style="display: inline-block; float: right">
+              <strong>${{product.price}}</strong>
+            </h6>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </main>
+    <script>
+      var cat = document.getElementsByClassName("category");
+      function applyFilter(event) {
+        event.preventDefault();
+        console.log("apply filter clivked");
+
+        const checkedCategories = [];
+        const businessName = [];
+        document.querySelectorAll(".category:checked").forEach((checkbox) => {
+          checkedCategories.push(checkbox.value);
+        });
+        document.querySelectorAll(".business_f:checked").forEach((checkbox) => {
+          businessName.push(checkbox.value);
+        });
+        console.log("Checked ctegories:", checkedCategories);
+        console.log("Business_name", businessName);
+
+        var url = "/reload_products/";
+        fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrftoken,
+          },
+          body: JSON.stringify({
+            product_type: checkedCategories,
+            business: businessName,
+          }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            const productList = document.querySelector(".product-row");
+            productList.innerHTML = "";
+            console.log(data);
+            data.products.forEach((product) => {
+              const productDiv = document.createElement("div");
+              productDiv.className = "col-lg-3 col-md-6";
+              productDiv.innerHTML = `
+              <img class="thumbnail" src="${product.imageURL}" />
+          <div class="box-element product">
+            <h6><strong>${product.name}</strong></h6>
+            <div style="display: flex; justify-content: space-between">
+              <h6>In stock: ${product.quantity}</h6>
+              <h6>${product.rating}</h6>
+            </div>
+            <hr />
+
+            <button
+              data-product="${product.id}"
+              data-qty="${product.quantity}"
+              data-action="add"
+              class="btn btn-outline-secondary add-btn update-cart"
+            >
+              Add to Cart
+            </button>
+            <a
+              class="btn btn-outline-success"
+              href="/product_desc/${product.id}"
+              >View</a
+            >
+            <h6 style="display: inline-block; float: right">
+              <strong>$${product.price}</strong>
+            </h6>
+          </div>`;
+              productList.appendChild(productDiv);
+            });
+            console.log(data);
+          });
+      }
+    </script>
+    {% endblock content %}
   </div>
-  {% endfor %}
 </div>
-
-{% endblock content %}

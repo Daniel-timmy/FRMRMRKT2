@@ -1,27 +1,41 @@
 {% extends 'store/main.html'%} {% load static %} {% block content %}
 <div class="card mb-3">
-  <img
-    src="https://mdbcdn.b-cdn.net/img/Photos/Lightbox/Original/img%20(112).webp"
-    class="card-img-top"
-    alt="..."
-    style="height: 300px; width: 300px"
-  />
+  <div style="display: flex; justify-content: space-evenly">
+    <div>
+      <img
+        src="https://mdbcdn.b-cdn.net/img/Photos/Lightbox/Original/img%20(112).webp"
+        class="card-img-top"
+        alt="..."
+        style="height: 300px; width: 300px"
+      />
+    </div>
+    <div style="max-width: 50%">
+      <p class="card-text">{{ product.description }}</p>
+    </div>
+  </div>
   <div class="card-body">
     <h5 class="card-title">{{product.name}}</h5>
-    <p class="card-text">Description: {{ product.description }}</p>
     <p class="card-text">Price: {{ product.price }}</p>
     <p class="card-text">Rating: {{ product.get_rating }}</p>
 
     <p class="card-text">In stock: {{ product.quantity }}</p>
   </div>
-  <button
-    data-product="{{product.id}}"
-    data-qty="{{product.quantity}}"
-    data-action="add"
-    class="btn btn-outline-secondary add-btn col-md-6 update-cart"
-  >
-    Add to Cart
-  </button>
+  <div style="display: flex; justify-content: space-between">
+    <button
+      data-product="{{product.id}}"
+      data-qty="{{product.quantity}}"
+      data-action="add"
+      class="btn btn-outline-secondary add-btn col-md-6 update-cart"
+    >
+      Add to Cart
+    </button>
+    <a
+      class="btn btn-dark add-btn col-md-6"
+      href="{% url 'business_profile' product.owner.id %}"
+    >
+      View {{product.owner.name}}
+    </a>
+  </div>
 </div>
 <div class="card mb-3">
   <h5 class="card-title">Reviews</h5>

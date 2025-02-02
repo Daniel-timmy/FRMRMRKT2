@@ -97,3 +97,24 @@ h1,h2,h3,h4,h5,h6{
 .hidden{
 	display: none!important;
 }
+.sidebar {
+	width: 200px;
+	background-color: #136a13;
+	color: #fff;
+	box-sizing: border-box;
+	position: fixed;
+}
+
+.sidebar a {
+	display: block;
+	color: #fff;
+	text-decoration: none;
+	padding: 10px;
+	margin-bottom: 10px;
+	transition: background-color 0.3s;
+}
+
+/* Change background color on hover */
+.sidebar a:hover {
+	background-color: #2980b9;
+}
