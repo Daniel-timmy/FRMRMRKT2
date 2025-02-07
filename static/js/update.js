@@ -78,8 +78,6 @@ for (var j = 0; j < showBtns.length; j++){
 		document.getElementById('status').innerHTML += this.dataset.status
 		let s = JSON.stringify(this.dataset.shipping)
 		const shipping = eval('(' + JSON.parse(s) + ')')
-		console.log(shipping)
-		console.log(typeof shipping)
 		document.getElementById('sc_name').innerHTML = shipping.customer
 		document.getElementById('sc_email').innerHTML = shipping.email
 		document.getElementById('city').innerHTML = shipping.city

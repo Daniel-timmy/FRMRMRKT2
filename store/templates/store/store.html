@@ -4,7 +4,7 @@
 <div>
   <div class="row">
     <!-- Sidebar -->
-    <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+    <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light">
       <div style="display: flex; justify-content: space-between">
         <h5>Filter by</h5>
         <a href="" onclick="applyFilter(event)">Apply</a>
@@ -133,14 +133,14 @@
             </div>
             <hr />
 
-            <button
+            <a
               data-product="${product.id}"
               data-qty="${product.quantity}"
               data-action="add"
               class="btn btn-outline-secondary add-btn update-cart"
             >
               Add to Cart
-            </button>
+            </a>
             <a
               class="btn btn-outline-success"
               href="/product_desc/${product.id}"

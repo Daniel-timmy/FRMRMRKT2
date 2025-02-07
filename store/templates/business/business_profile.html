@@ -18,7 +18,15 @@
         <p>{{ customer.business_location }}</p>
       </div>
     </div>
-    <div class="p-4 text-black bg-body-tertiary">
+    <div class="d-flex justify-content-between p-4 text-black bg-body-tertiary">
+      <div class="d-flex justify-content-end text-center py-1 text-body">
+        <div>
+          <button class="btn btn-dark">Message</button>
+        </div>
+        <div class="px-3">
+          <button class="btn btn-outline-dark">Custom Order</button>
+        </div>
+      </div>
       <div class="d-flex justify-content-end text-center py-1 text-body">
         <div>
           <p class="mb-1 h5">{{ customer.acct_type|capfirst }}</p>
@@ -35,7 +43,7 @@
         <p class="lead fw-normal mb-1">About Business:</p>
         <div class="p-4 bg-body-tertiary">
           <p class="font-italic mb-1">
-            {{ user.customer.business_description|default:"No description" }}
+            {{ customer.business_description|default:"No description" }}
           </p>
         </div>
       </div>

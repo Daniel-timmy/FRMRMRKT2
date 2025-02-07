@@ -1,0 +1,98 @@
+{% extends 'store/main.html' %} {% load static %} {% block content %}
+<style>
+  .overlay-view-order {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+
+    z-index: 2;
+    cursor: pointer;
+  }
+
+  .overlay-content-status {
+    position: absolute;
+
+    /* background: black; */
+    padding: 20px;
+    border-radius: 5px;
+    width: 80%;
+    max-width: 600px;
+  }
+</style>
+<h5>Order details</h5>
+<hr />
+<div id="overlay-view-order" class="overlay-view-order">
+  <div class="overlay-content-status align-items-center container">
+    {% for item in orderItems %}
+
+    <div class="row row-cols-3">
+      <div class="col">
+        <h6 style="font-size: 10px">Product ID:</h6>
+        <hr />
+
+        <h6>{{item.product.id}}</h6>
+      </div>
+      <div class="col">
+        <h6 style="font-size: 10px">Product name</h6>
+        <hr />
+        <h6>{{item.product.name}}</h6>
+      </div>
+
+      <div class="col">
+        <h6 style="font-size: 10px">Quantity:</h6>
+        <hr />
+
+        <h6>{{item.quantity}}</h6>
+      </div>
+    </div>
+
+    <div class="row row-cols-3">
+      <div class="col">
+        <h6 style="font-size: 10px">Price:</h6>
+        <hr />
+        <h6>${{ item.price }}</h6>
+      </div>
+      <div class="col">
+        <h6 style="font-size: 10px">Shipping Status</h6>
+        <hr />
+        <h6>{{ item.status }}</h6>
+      </div>
+    </div>
+    {% endfor %}
+
+    <hr />
+    <h6>Shipping Info</h6>
+
+    {% if shippingAddress != 'Not Available'%}
+    <div class="row row-cols-3">
+      <div class="col">
+        <h6 style="font-size: 10px">City:</h6>
+        <hr />
+        <h6 id="city" style="font-size: 12px">{{ shippingAddress.city }}</h6>
+      </div>
+    </div>
+    <div class="row row-cols-3">
+      <div class="col">
+        <h6 style="font-size: 10px">State:</h6>
+        <hr />
+        <h6 id="state" style="font-size: 12px">{{ shippingAddress.state }}</h6>
+      </div>
+      <div class="col">
+        <h6 style="font-size: 10px">Address:</h6>
+        <hr />
+        <h6 id="address" style="font-size: 12px">
+          {{ shippingAddress.address }}
+        </h6>
+      </div>
+      <div class="col">
+        <h6 style="font-size: 10px">Zip:</h6>
+        <hr />
+        <h6 id="zip" style="font-size: 12px">{{ shippingAddress.zipcode }}</h6>
+      </div>
+      {% endif %} {% if shippingAddress == 'Not Available'%}
+      <h6 style="font-size: 12px">{{ shippingAddress }}</h6>
+      {%endif%}
+    </div>
+  </div>
+</div>
+{% endblock content %}

@@ -83,8 +83,9 @@ def log_out(request):
 
 @login_required(login_url='/login/')
 def profile(request):
-
-	return render(request, 'business/profile.html')
+	orders = Order.objects.filter(customer=request.user.customer).order_by('-date_ordered').all()[:5]
+	context = {'orders':orders}
+	return render(request, 'business/profile.html', context)
 
 @login_required(login_url='/login/')
 def dashboard(request):
@@ -168,6 +169,23 @@ def reload_products(request):
 		products = Product.objects.all()
 		data["products"] = list(products.values("id", "name", "price", "quantity", "owner", "rating"))
 	return JsonResponse(data)
+
+@login_required(login_url='/login/')
+def view_order(request, id):
+	
+	order = Order.objects.get(id=id)
+	order_items = order.order_item_list
+	context = {'orderItems': order_items}
+	try:
+		shippingAddress = ShippingAddress.objects.get(order=order)
+	except Exception as e:
+		print('Does not exist')
+		shippingAddress = 'Not Available'
+
+	context['shippingAddress'] = shippingAddress
+	print(context)
+	return render(request, 'business/view_order.html', context)
+
 
 def cart(request):
 

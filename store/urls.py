@@ -26,4 +26,5 @@ urlpatterns = [
     path('review/<int:id>/', views.review, name="review"),
     path('reload_products/', views.reload_products, name="reload_products"),
     path('business_profile/<int:id>/', views.business_profile, name="business_profile"),
+    path('view_order/<int:id>', views.view_order, name="view_order"),
 ]
