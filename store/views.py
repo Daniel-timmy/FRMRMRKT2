@@ -85,14 +85,15 @@ def log_out(request):
 def profile(request):
 	orders = Order.objects.filter(customer=request.user.customer).order_by('-date_ordered').all()[:5]
 	context = {'orders':orders}
+	print(orders)
 	return render(request, 'business/profile.html', context)
 
 @login_required(login_url='/login/')
 def dashboard(request):
 	if request.user.customer.acct_type != 'business':
 		return redirect('/profile/')
-	order_items = OrderItem.objects.filter(business=request.user.customer).all()
-	new_order =       	order_items.filter(status='New').count()
+	order_items = OrderItem.objects.filter(business=request.user.customer, order__complete=True).all()
+	new_order =       	order_items.filter(status='New', order__complete=True).count()
 	shipped_orders =  	order_items.filter(status='Shipped').order_by('-date_added')[:5]
 	delivered_orders =	order_items.filter(status='Delivered').order_by('-date_added')[:5]
 	pending_orders =  	order_items.filter(status='Pending').order_by('-date_added')[:5]
@@ -157,17 +158,17 @@ def reload_products(request):
 	
 	if len(filter_data['product_type']) > 0 and len(filter_data['business']) > 0:
 		products = Product.objects.filter(category__in=filter_data['product_type'], owner__in=[int(x) for x in filter_data['business']] )
-		data["products"] = list(products.values("id", "name", "price", "quantity", "owner", "rating"))
+		data["products"] = list(products.values("id", "name", "price", "quantity", "owner", "rating", "image"))
 		print(products)
 	elif len(filter_data['product_type']) > 0:
 		products = Product.objects.filter(category__in=filter_data['product_type'])
-		data["products"] = list(products.values("id", "name", "price", "quantity", "owner", "rating"))
+		data["products"] = list(products.values("id", "name", "price", "quantity", "owner", "rating", "image"))
 	elif len(filter_data['business']) > 0:
 		products = Product.objects.filter(owner__in=[int(x) for x in filter_data['business']])
-		data["products"] = list(products.values("id", "name", "price", "quantity", "owner", "rating"))
+		data["products"] = list(products.values("id", "name", "price", "quantity", "owner", "rating", "image"))
 	else:
 		products = Product.objects.all()
-		data["products"] = list(products.values("id", "name", "price", "quantity", "owner", "rating"))
+		data["products"] = list(products.values("id", "name", "price", "quantity", "owner", "rating", "image"))
 	return JsonResponse(data)
 
 @login_required(login_url='/login/')
@@ -388,12 +389,15 @@ def show_all(request, status):
 		order_items = OrderItem.objects.filter(business=request.user.customer).all()
 		items =  order_items.filter(status=order_item_map[status]).order_by('-date_added')
 		if status == 'new_orders':
+			c_items = []
 			for item in items:
-				item.status = 'Pending'
-				item.save()
+				if item.order.complete == True:
+					item.status = 'Pending'
+					item.save()
+					c_items.append(item)
 
 
-	context = {'items': items, 'status': status}
+	context = {'items': c_items, 'status': status}
 	
 	print(context)
 	return render(request, 'business/show_all.html', context)

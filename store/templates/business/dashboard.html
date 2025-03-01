@@ -1,358 +1,359 @@
 {% extends 'business/mainb.html'%} {% load static %} {% block content %}
-<div class="d-flex" style="display: flex">
-  <div class="card" style="flex: 1; margin-right: 20px; width: 70%">
-    <div
-      class="rounded-top text-white d-flex flex-row"
-      style="background-color: #000; height: 200px"
-    >
-      <div class="ms-4 mt-5 d-flex flex-column" style="width: 150px">
-        <img
-          src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-profiles/avatar-1.webp"
-          alt="Generic placeholder image"
-          class="img-fluid img-thumbnail mt-4 mb-2"
-          style="width: 150px; z-index: 1"
-        />
-        \
-        <a
-          class="btn btn-dark edit"
-          data-id="{{ user.customer.id }}"
-          id="edit-customer"
-          style="z-index: 1"
-          >View</a
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-lg-8 mb-4">
+      <div class="card">
+        <div
+          class="rounded-top text-white d-flex flex-row"
+          style="background-color: #000; height: 200px"
         >
-      </div>
-      <div class="ms-3" style="margin-top: 130px">
-        <h5>{{ user.customer.name }}</h5>
-        <p>{{ user.customer.business_location }}</p>
-      </div>
-    </div>
-    <div class="p-4 text-black bg-body-tertiary">
-      <div class="d-flex justify-content-end text-center py-1 text-body">
-        <div>
-          <p class="mb-1 h5">{{ user.customer.acct_type|capfirst }}</p>
-          <p class="small text-muted mb-0">Account type</p>
+          <div class="ms-4 mt-5 d-flex flex-column" style="width: 150px">
+            <img
+              src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-profiles/avatar-1.webp"
+              alt="Generic placeholder image"
+              class="img-fluid img-thumbnail mt-4 mb-2"
+              style="width: 150px; z-index: 1"
+            />
+            <a
+              class="btn btn-dark edit"
+              data-id="{{ user.customer.id }}"
+              id="edit-customer"
+              style="z-index: 1"
+              >View</a
+            >
+          </div>
+          <div class="ms-3" style="margin-top: 130px">
+            <h5>{{ user.customer.name }}</h5>
+            <p>{{ user.customer.business_location }}</p>
+          </div>
         </div>
-        <div class="px-3">
-          <p class="mb-1 h5">{{ total_products }}</p>
-          <p class="small text-muted mb-0">Products</p>
+        <div class="p-4 text-black bg-body-tertiary">
+          <div class="d-flex justify-content-end text-center py-1 text-body">
+            <div>
+              <p class="mb-1 h5">{{ user.customer.acct_type|capfirst }}</p>
+              <p class="small text-muted mb-0">Account type</p>
+            </div>
+            <div class="px-3">
+              <p class="mb-1 h5">{{ total_products }}</p>
+              <p class="small text-muted mb-0">Products</p>
+            </div>
+            <div>
+              <a href="{% url 'show_all' 'new_orders' %}">
+                <p class="mb-1 h5">{{ new_orders }}</p>
+                <p class="small text-muted mb-0">New Orders</p>
+              </a>
+            </div>
+          </div>
         </div>
-        <div>
-          <a href="{% url 'show_all' 'new_orders' %}">
-            <p class="mb-1 h5">{{ new_orders }}</p>
-            <p class="small text-muted mb-0">New Orders</p>
-          </a>
-        </div>
-      </div>
-    </div>
-    <div class="card-body p-4 text-black">
-      <div class="mb-5 text-body">
-        <p class="lead fw-normal mb-1">About Business:</p>
-        <div class="p-4 bg-body-tertiary">
-          <p class="font-italic mb-1">
-            {{ user.customer.business_description|default:"No description" }}
-          </p>
-        </div>
-      </div>
-      <div
-        class="d-flex justify-content-between align-items-center mb-4 text-body"
-      >
-        <p class="lead fw-normal mb-0">Recent products</p>
-        <p class="mb-0">
-          <a href="{% url 'show_all' 'products' %}" class="text-muted"
-            >Show all</a
+        <div class="card-body p-4 text-black">
+          <div class="mb-5 text-body">
+            <p class="lead fw-normal mb-1">About Business:</p>
+            <div class="p-4 bg-body-tertiary">
+              <p class="font-italic mb-1">
+                {{ user.customer.business_description|default:'Not_Available' }}
+              </p>
+            </div>
+          </div>
+          <div
+            class="d-flex justify-content-between align-items-center mb-4 text-body"
           >
-        </p>
-      </div>
-      <div class="row g-2">
-        {% for product in products %}
-        <div class="col mb-2">
-          <img
-            src="https://mdbcdn.b-cdn.net/img/Photos/Lightbox/Original/img%20(112).webp"
-            alt="image 1"
-            class="w-100 rounded-3"
-          />
-          <div class="box-element product">
-            <h6><strong>{{product.name}}</strong></h6>
-            <h6>In stock: {{product.quantity}}</h6>
-            <hr />
-
-            <button
-              data-product="{{product.id}}"
-              data-action="delete"
-              class="btn btn-dark add-btn update-product"
-              style="border-radius: 5px"
-              id="delete-product"
-            >
-              Delete
-            </button>
-            <button
-              data-product="{{ product.id }}"
-              data-name="{{ product.name }}"
-              data-price="{{ product.price }}"
-              data-quantity="{{ product.quantity }}"
-              data-description="{{ product.description }}"
-              data-action="update"
-              class="btn btn-outline-dark add-btn update-product"
-              style="border-radius: 5px"
-              id="update-product"
-            >
-              Update
-            </button>
-            <h6 style="display: inline-block; float: right">
-              ${{product.price}}
-            </h6>
+            <p class="lead fw-normal mb-0">Recent products</p>
+            <p class="mb-0">
+              <a href="{% url 'show_all' 'products' %}" class="text-muted"
+                >Show all</a
+              >
+            </p>
           </div>
-        </div>
-        {% endfor %}
-      </div>
-    </div>
-  </div>
-  <div style="flex: 0.35">
-    <div class="card" style="margin-bottom: 40px">
-      <div
-        class="rounded-top text-white d-flex flex-row justify-content-center align-items-center"
-        style="background-color: #000; height: 100px"
-      >
-        <h5>Recent Orders</h5>
-      </div>
-      <div class="p-4 text-black bg-body-tertiary">
-        <div class="d-flex justify-content-end text-center py-1 text-body">
-          <div>
-            <p class="mb-1 h5">{{ total_orders }}</p>
-            <p class="small text-muted mb-0">Total Orders</p>
-          </div>
-          <div class="px-3">
-            <p class="mb-1 h5">{{ no_pending_orders }}</p>
-            <p class="small text-muted mb-0">Pending</p>
-          </div>
-          <div>
-            <p class="mb-1 h5">{{ no_shipped_orders }}</p>
-            <p class="small text-muted mb-0">Shipped</p>
-          </div>
-          <div class="px-3">
-            <p class="mb-1 h5">{{ no_delivered_orders }}</p>
-            <p class="small text-muted mb-0">Delivered</p>
-          </div>
-        </div>
-      </div>
-      <div class="card-body p-4 text-black">
-        <div
-          class="d-flex justify-content-between align-items-center mb-4 text-body"
-        >
-          <p class="mb-0">
-            <a href="{% url 'show_all' 'pending' %}" class="text-muted"
-              >Show all</a
-            >
-          </p>
-        </div>
-        <div class="row">
-          <div class="card">
-            <div class="card-header">Pending</div>
-            <table class="table table-dark table-hover">
-              <thead class="thead-dark">
-                <tr>
-                  <th scope="col">Date</th>
-                  <th scope="col">Transaction id</th>
-                  <th scope="col">Qty</th>
-                  <th scope="col">Product</th>
-                  <th scope="col">Price</th>
-                  <th scope="col">Status</th>
-                </tr>
-              </thead>
-              {% for item in pending_orders %}
-              <tbody>
-                <tr>
-                  <td>{{ item.date_added|date:"M d, h:i A" }}</td>
-                  <td>{{ item.order.transaction_id|slice:":6" }}...</td>
-                  <td>{{ item.quantity }}</td>
-                  <td>{{ item.product.name }}</td>
-                  <td>{{ item.price }}</td>
-                  <td>{{ item.status }}</td>
-                  <td>
-                    <button
-                      class="btn btn-primary add-btn show"
-                      type="button"
-                      data-id="{{ item.id }}"
-                      data-dateadded="{{ item.date_added }}"
-                      data-transactionid="{{ item.order.transaction_id }}"
-                      data-quantity="{{ item.quantity }}"
-                      data-name="{{ item.product.name }}"
-                      data-price="{{ item.price }}"
-                      data-status="{{ item.status }}"
-                      data-shipping="{{ item.get_shipping_address }}"
-                    >
-                      Show
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-              {% endfor %}
-            </table>
-          </div>
-        </div>
-      </div>
-      <div class="card-body p-4 text-black">
-        <div
-          class="d-flex justify-content-between align-items-center mb-4 text-body"
-        >
-          <p class="mb-0">
-            <a href="{% url 'show_all' 'shipped' %}" class="text-muted"
-              >Show all</a
-            >
-          </p>
-        </div>
-        <div class="row">
-          <div class="card">
-            <div class="card-header">Shipped</div>
-            <table class="table table-dark table-hover">
-              <thead class="thead-dark">
-                <tr>
-                  <th scope="col">Date</th>
-                  <th scope="col">Transaction id</th>
-                  <th scope="col">Qty</th>
-                  <th scope="col">Product</th>
-                  <th scope="col">Price</th>
-                  <th scope="col">Status</th>
-                </tr>
-              </thead>
-              {% for item in shipped_orders %}
-
-              <tbody>
-                <tr>
-                  <td>{{ item.date_added|date:"M d, h:i A" }}</td>
-                  <td>{{ item.order.transaction_id|slice:":6" }}...</td>
-                  <td>{{ item.quantity }}</td>
-                  <td>{{ item.product.name }}</td>
-                  <td>{{ item.price }}</td>
-                  <td>{{ item.status }}</td>
-                  <td>
-                    <button
-                      class="btn btn-primary show"
-                      type="button"
-                      data-id="{{ item.id }}"
-                      data-dateadded="{{ item.date_added }}"
-                      data-transactionid="{{ item.order.transaction_id }}"
-                      data-quantity="{{ item.quantity }}"
-                      data-name="{{ item.product.name }}"
-                      data-price="{{ item.price }}"
-                      data-status="{{ item.status }}"
-                      data-shipping="{{ item.get_shipping_address }}"
-                    >
-                      Show
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-              {% endfor %}
-            </table>
-          </div>
-        </div>
-      </div>
-      <div class="card-body p-4 text-black">
-        <div
-          class="d-flex justify-content-between align-items-center mb-4 text-body"
-        >
-          <p class="mb-0">
-            <a href="{% url 'show_all' 'delivered' %}" class="text-muted"
-              >Show all</a
-            >
-          </p>
-        </div>
-        <div class="row">
-          <div class="card">
-            <div class="card-header">Delivered</div>
-            <table class="table table-dark table-hover">
-              <thead class="thead-dark">
-                <tr>
-                  <th scope="col">Date</th>
-                  <th scope="col">Transaction id</th>
-                  <th scope="col">Qty</th>
-                  <th scope="col">Product</th>
-                  <th scope="col">Price</th>
-                  <th scope="col">Status</th>
-                </tr>
-              </thead>
-              {% for item in delivered_orders %}
-
-              <tbody>
-                <tr>
-                  <td>{{ item.date_added|date:"M d, h:i A" }}</td>
-                  <td>{{ item.order.transaction_id|slice:":6" }}...</td>
-                  <td>{{ item.quantity }}</td>
-                  <td>{{ item.product.name }}</td>
-                  <td>{{ item.price }}</td>
-                  <td>{{ item.status }}</td>
-                  <td>
-                    <button
-                      class="btn btn-primary show"
-                      type="button"
-                      data-id="{{ item.id }}"
-                      data-dateadded="{{ item.date_added }}"
-                      data-transactionid="{{ item.order.transaction_id }}"
-                      data-quantity="{{ item.quantity }}"
-                      data-name="{{ item.product.name }}"
-                      data-price="{{ item.price }}"
-                      data-status="{{ item.status }}"
-                    >
-                      Show
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-              {% endfor %}
-            </table>
+          <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
+            {% for product in products %}
+            <div class="col mb-2">
+              <img
+                src="https://mdbcdn.b-cdn.net/img/Photos/Lightbox/Original/img%20(112).webp"
+                alt="image 1"
+                class="w-100 rounded-3"
+              />
+              <div class="box-element product">
+                <h6><strong>{{product.name}}</strong></h6>
+                <h6>In stock: {{product.quantity}}</h6>
+                <hr />
+                <button
+                  data-product="{{product.id}}"
+                  data-action="delete"
+                  class="btn btn-dark add-btn update-product"
+                  style="border-radius: 5px"
+                  id="delete-product"
+                >
+                  Delete
+                </button>
+                <button
+                  data-product="{{ product.id }}"
+                  data-name="{{ product.name }}"
+                  data-price="{{ product.price }}"
+                  data-quantity="{{ product.quantity }}"
+                  data-description="{{ product.description }}"
+                  data-action="update"
+                  class="btn btn-outline-dark add-btn update-product"
+                  style="border-radius: 5px"
+                  id="update-product"
+                >
+                  Update
+                </button>
+                <h6 style="display: inline-block; float: right">
+                  ${{product.price}}
+                </h6>
+              </div>
+            </div>
+            {% endfor %}
           </div>
         </div>
       </div>
     </div>
-    <div class="card" style="margin-top: 20px">
-      <div
-        class="rounded-top text-white d-flex flex-row justify-content-center align-items-center"
-        style="background-color: #000; height: 100px"
-      >
-        <h5>Recent Purchase</h5>
-      </div>
-      <div class="p-4 text-black bg-body-tertiary"></div>
-      <div class="card-body p-4 text-black">
+    <div class="col-lg-4">
+      <div class="card mb-4">
         <div
-          class="d-flex justify-content-between align-items-center mb-4 text-body"
+          class="rounded-top text-white d-flex flex-row justify-content-center align-items-center"
+          style="background-color: #000; height: 100px"
         >
-          <p class="lead fw-normal mb-0">Recent products</p>
-          <p class="mb-0">
-            <a href="{% url 'show_all' 'purchases' %}" class="text-muted"
-              >Show all</a
-            >
-          </p>
+          <h5>Recent Orders</h5>
         </div>
-        <div class="row">
-          {% for item in order_items %}
-          <div class="card">
-            <div class="card-header">Featured</div>
-            <table class="table table-dark table-hover">
-              <thead class="thead-dark">
-                <tr>
-                  <th scope="col">Date</th>
-                  <th scope="col">Transaction id</th>
-                  <th scope="col">Qty</th>
-                  <th scope="col">Product</th>
-                  <th scope="col">Price</th>
-                  <th scope="col">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>{{ item.date_added }}</td>
-                  <td>{{ item.order.transaction_id }}</td>
-                  <td>{{ item.quantity }}</td>
-                  <td>{{ item.product.name }}</td>
-                  <td>{{ item.price }}</td>
-                  <td>{{ item.status }}</td>
-                  <td></td>
-                </tr>
-              </tbody>
-            </table>
+        <div class="p-4 text-black bg-body-tertiary">
+          <div class="d-flex justify-content-end text-center py-1 text-body">
+            <div>
+              <p class="mb-1 h5">{{ total_orders }}</p>
+              <p class="small text-muted mb-0">Total Orders</p>
+            </div>
+            <div class="px-3">
+              <p class="mb-1 h5">{{ no_pending_orders }}</p>
+              <p class="small text-muted mb-0">Pending</p>
+            </div>
+            <div>
+              <p class="mb-1 h5">{{ no_shipped_orders }}</p>
+              <p class="small text-muted mb-0">Shipped</p>
+            </div>
+            <div class="px-3">
+              <p class="mb-1 h5">{{ no_delivered_orders }}</p>
+              <p class="small text-muted mb-0">Delivered</p>
+            </div>
           </div>
-          {% endfor %}
+        </div>
+        <div class="card-body p-4 text-black">
+          <div
+            class="d-flex justify-content-between align-items-center mb-4 text-body"
+          >
+            <p class="mb-0">
+              <a href="{% url 'show_all' 'pending' %}" class="text-muted"
+                >Show all</a
+              >
+            </p>
+          </div>
+          <div class="row">
+            <div class="card">
+              <div class="card-header">Pending</div>
+              <table class="table table-dark table-hover">
+                <thead class="thead-dark">
+                  <tr>
+                    <th scope="col">Date</th>
+                    <th scope="col">Transaction id</th>
+                    <th scope="col">Qty</th>
+                    <th scope="col">Product</th>
+                    <th scope="col">Price</th>
+                    <th scope="col">Status</th>
+                  </tr>
+                </thead>
+                {% for item in pending_orders %}
+                <tbody>
+                  <tr>
+                    <td>{{ item.date_added|date:"M d, h:i A" }}</td>
+                    <td>{{ item.order.transaction_id|slice:":6" }}...</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ item.product.name }}</td>
+                    <td>{{ item.price }}</td>
+                    <td>{{ item.status }}</td>
+                    <td>
+                      <button
+                        class="btn btn-primary add-btn show"
+                        type="button"
+                        data-id="{{ item.id }}"
+                        data-dateadded="{{ item.date_added }}"
+                        data-transactionid="{{ item.order.transaction_id }}"
+                        data-quantity="{{ item.quantity }}"
+                        data-name="{{ item.product.name }}"
+                        data-price="{{ item.price }}"
+                        data-status="{{ item.status }}"
+                        data-shipping="{{ item.get_shipping_address }}"
+                      >
+                        Show
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+                {% endfor %}
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="card-body p-4 text-black">
+          <div
+            class="d-flex justify-content-between align-items-center mb-4 text-body"
+          >
+            <p class="mb-0">
+              <a href="{% url 'show_all' 'shipped' %}" class="text-muted"
+                >Show all</a
+              >
+            </p>
+          </div>
+          <div class="row">
+            <div class="card">
+              <div class="card-header">Shipped</div>
+              <table class="table table-dark table-hover">
+                <thead class="thead-dark">
+                  <tr>
+                    <th scope="col">Date</th>
+                    <th scope="col">Transaction id</th>
+                    <th scope="col">Qty</th>
+                    <th scope="col">Product</th>
+                    <th scope="col">Price</th>
+                    <th scope="col">Status</th>
+                  </tr>
+                </thead>
+                {% for item in shipped_orders %}
+                <tbody>
+                  <tr>
+                    <td>{{ item.date_added|date:"M d, h:i A" }}</td>
+                    <td>{{ item.order.transaction_id|slice:":6" }}...</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ item.product.name }}</td>
+                    <td>{{ item.price }}</td>
+                    <td>{{ item.status }}</td>
+                    <td>
+                      <button
+                        class="btn btn-primary show"
+                        type="button"
+                        data-id="{{ item.id }}"
+                        data-dateadded="{{ item.date_added }}"
+                        data-transactionid="{{ item.order.transaction_id }}"
+                        data-quantity="{{ item.quantity }}"
+                        data-name="{{ item.product.name }}"
+                        data-price="{{ item.price }}"
+                        data-status="{{ item.status }}"
+                        data-shipping="{{ item.get_shipping_address }}"
+                      >
+                        Show
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+                {% endfor %}
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="card-body p-4 text-black">
+          <div
+            class="d-flex justify-content-between align-items-center mb-4 text-body"
+          >
+            <p class="mb-0">
+              <a href="{% url 'show_all' 'delivered' %}" class="text-muted"
+                >Show all</a
+              >
+            </p>
+          </div>
+          <div class="row">
+            <div class="card">
+              <div class="card-header">Delivered</div>
+              <table class="table table-dark table-hover">
+                <thead class="thead-dark">
+                  <tr>
+                    <th scope="col">Date</th>
+                    <th scope="col">Transaction id</th>
+                    <th scope="col">Qty</th>
+                    <th scope="col">Product</th>
+                    <th scope="col">Price</th>
+                    <th scope="col">Status</th>
+                  </tr>
+                </thead>
+                {% for item in delivered_orders %}
+                <tbody>
+                  <tr>
+                    <td>{{ item.date_added|date:"M d, h:i A" }}</td>
+                    <td>{{ item.order.transaction_id|slice:":6" }}...</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ item.product.name }}</td>
+                    <td>{{ item.price }}</td>
+                    <td>{{ item.status }}</td>
+                    <td>
+                      <button
+                        class="btn btn-primary show"
+                        type="button"
+                        data-id="{{ item.id }}"
+                        data-dateadded="{{ item.date_added }}"
+                        data-transactionid="{{ item.order.transaction_id }}"
+                        data-quantity="{{ item.quantity }}"
+                        data-name="{{ item.product.name }}"
+                        data-price="{{ item.price }}"
+                        data-status="{{ item.status }}"
+                      >
+                        Show
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+                {% endfor %}
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card mt-4">
+        <div
+          class="rounded-top text-white d-flex flex-row justify-content-center align-items-center"
+          style="background-color: #000; height: 100px"
+        >
+          <h5>Recent Purchase</h5>
+        </div>
+        <div class="p-4 text-black bg-body-tertiary"></div>
+        <div class="card-body p-4 text-black">
+          <div
+            class="d-flex justify-content-between align-items-center mb-4 text-body"
+          >
+            <p class="lead fw-normal mb-0">Recent products</p>
+            <p class="mb-0">
+              <a href="{% url 'show_all' 'purchases' %}" class="text-muted"
+                >Show all</a
+              >
+            </p>
+          </div>
+          <div class="row">
+            <div class="card">
+              <div class="card-header">Featured</div>
+              <table class="table table-dark table-hover">
+                <thead class="thead-dark">
+                  <tr>
+                    <th scope="col">Date</th>
+                    <th scope="col">Transaction id</th>
+                    <th scope="col">Qty</th>
+                    <th scope="col">Product</th>
+                    <th scope="col">Price</th>
+                    <th scope="col">Status</th>
+                  </tr>
+                </thead>
+                {% for item in order_items %}
+
+                <tbody>
+                  <tr>
+                    <td>{{ item.date_added }}</td>
+                    <td>{{ item.order.transaction_id }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ item.product.name }}</td>
+                    <td>{{ item.price }}</td>
+                    <td>{{ item.status }}</td>
+                    <td></td>
+                  </tr>
+                </tbody>
+                {% endfor %}
+              </table>
+            </div>
+          </div>
         </div>
       </div>
     </div>
