@@ -29,7 +29,7 @@ class Product(models.Model):
     owner = models.ForeignKey(Customer, on_delete=models.CASCADE, null=True)
     category = models.CharField(max_length=50, default='Generic')
     date_added = models.DateTimeField(default=datetime.now())
-    rating = models.IntegerField(default=1)
+    rating = models.FloatField(default=1.0)
 
     @property
     def imageURL(self):
@@ -56,7 +56,7 @@ class Product(models.Model):
                continue
             count += 1
             rv.append(review.rating)
-        return sum(rv)/count if count > 0 else 1
+        return round(sum(rv)/count if count > 0 else 1, 1)
 	
 class Reviews(models.Model):
 	customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True)

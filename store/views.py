@@ -472,7 +472,7 @@ def review(request, id):
 								  product=product, review=data['review'], 
 								  rating=int(data['rating']) if data['rating'] != '' else 0)
 		review.save()
-		print(Reviews.objects.all())
-		print(product.get_rating)
+		product.rating = round(product.get_rating, 1)
+		product.save()
 		return JsonResponse('Review submitted', safe=False)
 	return JsonResponse({'error': 'Invalid request method'}, status=400)
