@@ -134,3 +134,11 @@ class ShippingAddress(models.Model):
 	def __str__(self):
 		return str({'address': self.address, 'city': self.city, 'state': self.state,
 		   'zipcode': self.zipcode, 'customer': self.customer.name, 'email': self.customer.email})
+	
+class Wishlist(models.Model):
+	customer = models.OneToOneField(Customer, on_delete=models.CASCADE, null=False)
+	products = models.JSONField(default=dict)
+
+	def __str__(self):
+		# for p in 
+		return str(self.products)

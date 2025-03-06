@@ -1,5 +1,39 @@
 var updateBtns = document.getElementsByClassName('update-cart')
+function handleFavClick(fav) {
+	const productId = fav.getAttribute("data-product");
+	if (user == "AnonymousUser") {
+	  alert("You can only add to favourite while logged in");
+	  return;
+	}
+	if (fav.className === "fa-solid fa-heart") {
+	  fav.className = "fa-regular fa-heart";
+	  add_remove_fav(productId, "unfav");
+	} else {
+	  fav.className = "fa-solid fa-heart";
+	  add_remove_fav(productId, "fav");
+	}
+  }
 
+  function add_remove_fav(id, action) {
+	let url = "/add_to_favourite/";
+	fetch(url, {
+	  method: "POST",
+	  headers: {
+		"Content-Type": "application/json",
+		"X-CSRFToken": csrftoken,
+	  },
+	  body: JSON.stringify({
+		id: id,
+		action: action,
+	  }),
+	})
+	  .then((response) => response.json())
+	  .then((data) => {
+		console.log(data);
+		alert(data);
+	  })
+	  .catch((error) => console.error("Error:", error));
+  }
 for (i = 0; i < updateBtns.length; i++) {
 	updateBtns[i].addEventListener('click', function(){
 		var productId = this.dataset.product
@@ -37,6 +71,8 @@ function updateUserOrder(productId, action){
 		    location.reload()
 		});
 }
+
+
 
 function addCookieItem(productId, productqty, action){
 	console.log('User is not authenticated')

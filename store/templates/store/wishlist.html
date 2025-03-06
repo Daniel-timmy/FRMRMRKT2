@@ -1,0 +1,135 @@
+{% extends 'store/main.html' %} {% load static %} {% block content %}
+
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/MaterialDesign-Webfont/5.3.45/css/materialdesignicons.css"
+  integrity="sha256-NAxhqDvtY0l4xn+YVa6WjAcmd94NNfttjNsDmNatFVc="
+  crossorigin="anonymous"
+/>
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=store"
+/>
+<section class="section">
+  <div class="container">
+    <div class="justify-content-center row">
+      <div class="col-lg-12">
+        <div class="candidate-list-widgets mb-4"></div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-lg-12">
+        <!-- <div class="align-items-center row">
+          <div class="col-lg-8">
+            <div class="mb-3 mb-lg-0">
+              <h6 class="fs-16 mb-0">Showing 1 – 8 of 11 results</h6>
+            </div>
+          </div>
+        </div> -->
+        <div class="candidate-list">
+          {% for product in products %}
+
+          <div class="candidate-list-box card mt-4">
+            <div class="p-4 card-body">
+              <div class="align-items-center row">
+                <div class="col-auto">
+                  <div class="candidate-list-images">
+                    <a href="{% url 'product_desc' product.id %}">
+                      <img
+                        class="avatar-md img-thumbnail"
+                        src="{{product.imageURL}}"
+                        href="{% url 'product_desc' product.id %}"
+                    /></a>
+                  </div>
+                </div>
+                <div class="col-lg-5">
+                  <div class="candidate-list-content mt-3 mt-lg-0">
+                    <h5 class="fs-19 mb-0">
+                      <a class="primary-link" href="#">{{product.name}}</a
+                      ><span class="badge bg-success ms-1"
+                        ><i class="mdi mdi-star align-middle"></i
+                        >{{product.get_rating}}</span
+                      >
+                    </h5>
+                    <p class="text-muted mb-2">{{product.category}}</p>
+                    <ul class="list-inline mb-0 text-muted">
+                      <li class="list-inline-item">
+                        <span class="material-symbols-outlined"> store </span>
+
+                        {{product.owner.name}}
+                      </li>
+                      <li class="list-inline-item">
+                        <i class="mdi mdi-wallet"></i> ${{product.price}}
+                      </li>
+                      <li class="list-inline-item" style="float: inline-end">
+                        <a
+                          data-product="{{product.id}}"
+                          data-qty="{{product.quantity}}"
+                          data-action="add"
+                          class="btn add-btn update-cart"
+                        >
+                          <img
+                            id="cart-icon"
+                            src="{% static 'images/add-to-cart.png' %}"
+                          />
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              <div class="favorite-icon">
+                {% if product.id|stringformat:"s" in wishlist %}
+                <i
+                  class="fa-solid fa-heart"
+                  data-product="{{product.id}}"
+                  data-customer="{{user}}"
+                  style="color: rgb(255, 183, 0)"
+                  aria-hidden="true"
+                  onclick="handleFavClick(this)"
+                ></i>
+                {% endif %} {% if product.id|stringformat:"s" not in wishlist %}
+
+                <i
+                  class="fa-regular fa-heart"
+                  data-product="{{product.id}}"
+                  data-customer="{{user}}"
+                  style="color: rgb(255, 183, 0)"
+                  aria-hidden="true"
+                  onclick="handleFavClick(this)"
+                ></i>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    <!-- <div class="row">
+      <div class="mt-4 pt-2 col-lg-12">
+        <nav aria-label="Page navigation example">
+          <div class="pagination job-pagination mb-0 justify-content-center">
+            <li class="page-item disabled">
+              <a class="page-link" tabindex="-1" href="#"
+                ><i class="mdi mdi-chevron-double-left fs-15"></i
+              ></a>
+            </li>
+            <li class="page-item active">
+              <a class="page-link" href="#">1</a>
+            </li>
+            <li class="page-item"><a class="page-link" href="#">2</a></li>
+            <li class="page-item"><a class="page-link" href="#">3</a></li>
+            <li class="page-item"><a class="page-link" href="#">4</a></li>
+            <li class="page-item">
+              <a class="page-link" href="#"
+                ><i class="mdi mdi-chevron-double-right fs-15"></i
+              ></a>
+            </li>
+          </div>
+        </nav>
+      </div>
+    </div> -->
+  </div>
+</section>
+{% endblock content %}

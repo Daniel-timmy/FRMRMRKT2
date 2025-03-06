@@ -57,31 +57,28 @@
           >
         </p>
       </div>
-      <div class="row g-2">
+      <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
         {% for product in products %}
         <div class="col mb-2">
-          <img
-            src="https://mdbcdn.b-cdn.net/img/Photos/Lightbox/Original/img%20(112).webp"
-            alt="image 1"
-            class="w-100 rounded-3"
-          />
+          <a href="{% url 'product_desc' product.id %}">
+            <img
+              class="thumbnail"
+              src="{{product.imageURL}}"
+              href="{% url 'product_desc' product.id %}"
+          /></a>
           <div class="box-element product">
             <h6><strong>{{product.name}}</strong></h6>
             <h6>In stock: {{product.quantity}}</h6>
             <hr />
-            <button
+            <a
               data-product="{{product.id}}"
               data-qty="{{product.quantity}}"
               data-action="add"
-              class="btn btn-outline-secondary add-btn update-cart"
+              class="btn add-btn update-cart"
             >
-              Add to Cart
-            </button>
-            <a
-              class="btn btn-outline-success"
-              href="{% url 'product_desc' product.id %}"
-              >View</a
-            >
+              <img id="cart-icon" src="{% static 'images/add-to-cart.png' %}" />
+            </a>
+
             <h6 style="display: inline-block; float: right">
               ${{product.price}}
             </h6>

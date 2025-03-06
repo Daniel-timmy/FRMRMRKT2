@@ -31,7 +31,7 @@ def log_in(request):
             return redirect('/login/')
         else:
             login(request, user)
-            return redirect('/store/')
+            return redirect('/')
     
     return render(request, 'store/login.html')
 
@@ -78,7 +78,7 @@ def register(request):
 
 def log_out(request):
 	logout(request)
-	return redirect('/store/')
+	return redirect('/')
 
 
 @login_required(login_url='/login/')
@@ -150,11 +150,39 @@ def store(request):
 	context['categories'] = categories
 	businesses = Customer.objects.filter(acct_type='business')
 	context['businesses'] = businesses
+	wishlist = {}
+	if request.user.is_authenticated and hasattr(request.user, 'customer'):
+		wishlist = Wishlist.objects.filter(customer=request.user.customer).first()
+		print(wishlist.products)
+	context['wishlist'] = wishlist.products
+		
 	return render(request, 'store/store.html', context)
+
+@login_required(login_url='/login/')
+def wishlist(request):
+
+	data = cartData(request)
+	cartItems = data['cartItems']
+	order = data['order']
+	items = data['items']
+
+	context = {'cartItems':cartItems}
+	
+	wishlist = {}
+	wishlist = Wishlist.objects.filter(customer=request.user.customer).first()
+	products = Product.objects.filter(id__in=[int(k) for k, v in wishlist.products.items()])
+	print(products)
+
+	print(wishlist.products)
+	context['wishlist'] = wishlist.products
+	context['products'] = products
+		
+	return render(request, 'store/wishlist.html', context)
 
 def reload_products(request):
 	filter_data = json.loads(request.body)
 	data = {}
+	wishlist = {}
 	
 	if len(filter_data['product_type']) > 0 and len(filter_data['business']) > 0:
 		products = Product.objects.filter(category__in=filter_data['product_type'], owner__in=[int(x) for x in filter_data['business']] )
@@ -169,6 +197,12 @@ def reload_products(request):
 	else:
 		products = Product.objects.all()
 		data["products"] = list(products.values("id", "name", "price", "quantity", "owner", "rating", "image"))
+	if request.user.is_authenticated and hasattr(request.user, 'customer'):
+		wishlist = Wishlist.objects.filter(customer=request.user.customer).first()
+		print(wishlist.products)
+		data["wishlist"] = wishlist.products
+	else:
+		data["wishlist"] = wishlist
 	return JsonResponse(data)
 
 @login_required(login_url='/login/')
@@ -331,6 +365,31 @@ def update_product(request):
 			product.delete()
 		return JsonResponse('Product updated', safe=False)
 	return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+@login_required(login_url='/login/')
+def add_to_favourite(request):
+	if request.method == 'POST' and request.user.customer:
+		data = json.loads(request.body)
+		wishlist, created = Wishlist.objects.get_or_create(customer=request.user.customer)
+		if data['action'] == 'fav':
+			prd = Product.objects.get(id=data['id'])
+			print(prd)
+			if wishlist.products is None:
+				wishlist.products = {}
+			wishlist.products[prd.id] = prd.name
+			wishlist.save()
+			print(wishlist)
+
+			return JsonResponse(f'{prd.name} added to wishlist', status=201, safe=False)
+		elif data['action'] == 'unfav':
+			prd = Product.objects.get(id=data['id'])
+			wishlist.products.pop(f'{prd.id}')
+			wishlist.save()
+			print(wishlist)
+			return JsonResponse(f'{prd.name} removed from wishlist', status=201, safe=False)
+	else:
+		return JsonResponse(f'User must be logged in to have a wishlist', status=200)	
+			
 
 @login_required(login_url='/login/')
 def update_customer(request):

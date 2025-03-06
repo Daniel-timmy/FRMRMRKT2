@@ -1,6 +1,10 @@
 {% extends 'store/main.html' %} {% load static %} {% block content %}
-<!-- <button id="reload-products" class="btn btn-primary">Reload Products</button> -->
-
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/MaterialDesign-Webfont/5.3.45/css/materialdesignicons.css"
+  integrity="sha256-NAxhqDvtY0l4xn+YVa6WjAcmd94NNfttjNsDmNatFVc="
+  crossorigin="anonymous"
+/>
 <div>
   <div class="row">
     <!-- Sidebar -->
@@ -65,10 +69,15 @@
               href="{% url 'product_desc' product.id %}"
           /></a>
           <div class="box-element product">
-            <h6><strong>{{product.name}}</strong></h6>
+            <h6 class="fs-19 mb-0">
+              <a class="primary-link">{{product.name}}</a
+              ><span class="badge bg-success ms-1"
+                ><i class="mdi mdi-star align-middle"></i
+                >{{product.get_rating}}</span
+              >
+            </h6>
             <div style="display: flex; justify-content: space-between">
               <h6>In stock: {{product.quantity}}</h6>
-              <h6>{{product.get_rating}}</h6>
             </div>
             <hr />
             <a
@@ -79,6 +88,26 @@
             >
               <img id="cart-icon" src="{% static 'images/add-to-cart.png' %}" />
             </a>
+            {% if product.id|stringformat:"s" in wishlist %}
+            <i
+              class="fa-solid fa-heart"
+              data-product="{{product.id}}"
+              data-customer="{{user}}"
+              style="color: rgb(255, 183, 0)"
+              aria-hidden="true"
+              onclick="handleFavClick(this)"
+            ></i>
+            {% endif %} {% if product.id|stringformat:"s" not in wishlist %}
+
+            <i
+              class="fa-regular fa-heart"
+              data-product="{{product.id}}"
+              data-customer="{{user}}"
+              style="color: rgb(255, 183, 0)"
+              aria-hidden="true"
+              onclick="handleFavClick(this)"
+            ></i>
+            {% endif %}
 
             <h6 style="display: inline-block; float: right">
               <strong>${{product.price}}</strong>
@@ -122,6 +151,7 @@
             const productList = document.querySelector(".product-row");
             productList.innerHTML = "";
             console.log(data);
+            wishlist = data["wishlist"];
             data.products.forEach((product) => {
               const productDiv = document.createElement("div");
               productDiv.className = "col-lg-3 col-md-6 my-2";
@@ -130,10 +160,15 @@
                 <img class="thumbnail" src="images/${product.image}" />
               </a>
               <div class="box-element product">
-                  <h6><strong>${product.name}</strong></h6>
+                   <h6 class="fs-19 mb-0">
+              <a class="primary-link">${product.name}</a
+              ><span class="badge bg-success ms-1"
+                ><i class="mdi mdi-star align-middle"></i
+                >${product.rating}</span
+              >
+            </h6>
                   <div style="display: flex; justify-content: space-between">
                     <h6>In stock: ${product.quantity}</h6>
-                    <h6>${product.rating}</h6>
                   </div>
                   <hr />
                 <a
@@ -144,6 +179,29 @@
                 >
                   <img id="cart-icon" src="{% static 'images/add-to-cart.png' %}" />
                 </a>
+                  ${
+                    product.id.toString() in wishlist
+                      ? `
+                     <i
+                       class="fa-solid fa-heart"
+                       data-product="${product.id}"
+                       data-customer="${user}"
+                       style="color: rgb(255, 183, 0)"
+                       aria-hidden="true"
+                       onclick="handleFavClick(this)"
+                     ></i>
+                     `
+                      : `
+                     <i
+                       class="fa-regular fa-heart"
+                       data-product="${product.id}"
+                       data-customer="${user}"
+                       style="color: rgb(255, 183, 0)"
+                       aria-hidden="true"
+                       onclick="handleFavClick(this)"
+                     ></i>
+                     `
+                  }
                 <h6 style="display: inline-block; float: right">
                   <strong>$${product.price}</strong>
                 </h6>
@@ -154,6 +212,6 @@
           });
       }
     </script>
-    {% endblock content %}
   </div>
 </div>
+{% endblock content %}
